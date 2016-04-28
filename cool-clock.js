@@ -1,4 +1,3 @@
-vis = false;
 var csa = '"style="position:absolute;top:0px;left:0px;width:16px;height:16px;font-family:Arial,sans-serif;font-size:16px;text-align:center;font-weight:bold;color:';
 var csb = '"style="position:absolute;top:0px;left:0px;width:10px;height:10px;font-family:Arial,sans-serif;text-align:center;font-size:10px;color:';
 var csc = '"style="position:absolute;top:0px;left:0px;width:10px;height:10px;font-family:Arial, sans-serif;text-align:center;font-size:';
@@ -38,7 +37,7 @@ if (document.getElementById && !document.layers) {
   ofx = -3;
   ofst = 70;
   tmr = null;
-  vis = true;
+  vis = false;
   mouseY = 0;
   mouseX = 0;
   dy = new Array();
