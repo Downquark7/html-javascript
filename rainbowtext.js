@@ -1,7 +1,7 @@
 function byte2Hex(n)
 {
-  var nybHexString = "0123456789ABCDEF";
-  return String(nybHexString.substr((n >> 4) & 0x0F,1)) + nybHexString.substr(n & 0x0F,1);
+	var nybHexString = "0123456789ABCDEF";
+	return String(nybHexString.substr((n >> 4) & 0x0F,1)) + nybHexString.substr(n & 0x0F,1);
 }
 
 function RGB2Color(r,g,b)
@@ -22,7 +22,7 @@ for (var i = 0; i < len; ++i)
 	var gn = Math.sin(freq*i + 2 * Math.PI / 3) * width + center;
 	var bl = Math.sin(freq*i + 4 * Math.PI / 3) * width + center;
 	var rainbownode = document.createElement("font");
-  rainbownode.innerHTML = rainbowtextstring;
-  rainbownode.style = "font-size: "+fontsizepx+"; color: "+RGB2Color(rd,gn,bl)+";";
-  document.body.appendChild(rainbownode);
+ 	rainbownode.innerHTML = rainbowtextstring;
+ 	rainbownode.style = "font-size: "+fontsizepx+"; color: "+RGB2Color(rd,gn,bl)+";";
+ 	document.body.appendChild(rainbownode);
 }
