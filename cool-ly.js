@@ -43,3 +43,31 @@ var ab = 0;
 function myFunction() {
     changeee();
 }
+
+
+function byte2Hex(n) {
+  var nybHexString = "0123456789ABCDEF";
+  return String(nybHexString.substr((n >> 4) & 0x0F, 1)) + nybHexString.substr(n & 0x0F, 1);
+}
+
+var rrr = 1;
+var ggg = 1;
+var bbb = 1;
+var seqqq = 1;
+
+function changecolorrr() {
+  document.getElementById("myList1").appendChild(document.getElementById("myList1").firstChild);
+  document.getElementById("myList1").lastChild.style.color = "#" + byte2Hex(rrr) + byte2Hex(ggg) + byte2Hex(bbb);
+  document.getElementById("cool").style.color = "#" + byte2Hex(rrr) + byte2Hex(ggg) + byte2Hex(bbb);
+  document.getElementById("button1").style.color = "#" + byte2Hex(rrr) + byte2Hex(ggg) + byte2Hex(bbb);
+  document.getElementById("button2").style.color = "#" + byte2Hex(rrr) + byte2Hex(ggg) + byte2Hex(bbb);
+}
+
+function changeee() {
+  var frequencyyy = 0.1;
+  rrr = Math.sin(frequencyyy * seqqq) * 128 + 127;
+  bbb = Math.sin(frequencyyy * seqqq + 2 * Math.PI / 3) * 128 + 127;
+  ggg = Math.sin(frequencyyy * seqqq + 4 * Math.PI / 3) * 128 + 127;
+  changecolorrr();
+  seqqq++;
+}
