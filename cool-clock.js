@@ -3,11 +3,11 @@ var csa = '"style="position:absolute;top:0px;left:0px;width:16px;height:16px;fon
 var csb = '"style="position:absolute;top:0px;left:0px;width:10px;height:10px;font-family:Arial,sans-serif;text-align:center;font-size:10px;color:';
 var csc = '"style="position:absolute;top:0px;left:0px;width:10px;height:10px;font-family:Arial, sans-serif;text-align:center;font-size:';
 if (document.getElementById && !document.layers) {
-  dCol = '#000000';
-  fCol = '#000000';
-  sCol = '#000000';
-  mCol = '#000000';
-  hCol = '#000000';
+  dCol = '#ffffff';
+  fCol = '#ffffff';
+  sCol = '#ffffff';
+  mCol = '#ffffff';
+  hCol = '#ffffff';
   del = 0.6;
   ref = 40;
   var ieType = (typeof window.innerWidth != 'number');
@@ -180,9 +180,9 @@ function byte2Hex(n) {
   var nybHexString = "0123456789ABCDEF";
   return String(nybHexString.substr((n >> 4) & 0x0F, 1)) + nybHexString.substr(n & 0x0F, 1);
 }
-var r = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-var g = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-var b = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+var r = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+var g = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+var b = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 var seq = 1;
 
 function changecolor() {
