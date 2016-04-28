@@ -37,7 +37,7 @@ if (document.getElementById && !document.layers) {
   ofx = -3;
   ofst = 70;
   tmr = null;
-  var vis = false;
+  vis = false;
   mouseY = 0;
   mouseX = 0;
   dy = new Array();
@@ -218,5 +218,5 @@ function starteffect() {
 }
 
 function startTheClock() {
-	vis = true;
- }
+  onoff();
+}
