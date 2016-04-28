@@ -216,4 +216,4 @@ function change() {
 function starteffect() {
   flash = setInterval("change()", 40);
 }
-starteffect();
+
