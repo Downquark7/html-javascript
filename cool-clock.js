@@ -3,11 +3,11 @@ var csa = '"style="position:absolute;top:0px;left:0px;width:16px;height:16px;fon
 var csb = '"style="position:absolute;top:0px;left:0px;width:10px;height:10px;font-family:Arial,sans-serif;text-align:center;font-size:10px;color:';
 var csc = '"style="position:absolute;top:0px;left:0px;width:10px;height:10px;font-family:Arial, sans-serif;text-align:center;font-size:';
 if (document.getElementById && !document.layers) {
-  dCol = '#ffffff';
-  fCol = '#ffffff';
-  sCol = '#ffffff';
-  mCol = '#ffffff';
-  hCol = '#ffffff';
+  dCol = '#000000';
+  fCol = '#000000';
+  sCol = '#000000';
+  mCol = '#000000';
+  hCol = '#000000';
   del = 0.6;
   ref = 40;
   var ieType = (typeof window.innerWidth != 'number');
@@ -219,6 +219,3 @@ function starteffect() {
 }
 
 
-function startTheClock() {
-  changecolor();
-}
