@@ -21,5 +21,8 @@ for (var i = 0; i < len; ++i)
 	var rd = Math.sin(freq*i + 0 * Math.PI / 3) * width + center;
 	var gn = Math.sin(freq*i + 2 * Math.PI / 3) * width + center;
 	var bl = Math.sin(freq*i + 4 * Math.PI / 3) * width + center;
-	document.write( '<font style="font-size: ' + fontsizepx + 'px; color=' + RGB2Color(rd,gn,bl) + '">' + rainbowtextstring + '</font>');
+	var rainbownode = document.createElement("div");
+  rainbownode.innerHTML = rainbowtextstring;
+  rainbownode.style = "font-size: "+fontsizepx+"; color: "+RGB2Color(rd,gn,bl)+";";
+  document.body.appendChild(rainbownode);
 }
