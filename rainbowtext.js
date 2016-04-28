@@ -13,7 +13,7 @@ var center = 128;
 var width = 127;
 var len = 100;
 var freq = 2*Math.PI/len;
-var fontsizepx = "10";
+var fontsizepx = "16";
 var rainbowtextstring = "Hello World! ";
 
 for (var i = 0; i < len; ++i)
