@@ -37,7 +37,7 @@ if (document.getElementById && !document.layers) {
   ofx = -3;
   ofst = 70;
   tmr = null;
-  vis = false;
+  var vis = false;
   mouseY = 0;
   mouseX = 0;
   dy = new Array();
