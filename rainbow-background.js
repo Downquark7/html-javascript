@@ -27,6 +27,7 @@ function changecolorrrrr() {
   document.getElementById("progressg").value = ggggg;
   document.getElementById("progressb").value = bbbbb;
 }
+
 function changeeeee() {
   var frequencyyyyy = 0.001;
   rrrrr = Math.sin(frequencyyyyy * seqqqqq) * 128 + 127;
@@ -34,5 +35,6 @@ function changeeeee() {
   ggggg = Math.sin(frequencyyyyy * seqqqqq + 4 * Math.PI / 3) * 128 + 127;
   seqqqqq = seqqqqq + 1;
   changecolorrrrr();
-};
+}
+
 setInterval('changeeeee()', 40);
