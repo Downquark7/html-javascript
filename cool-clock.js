@@ -1,4 +1,4 @@
-function startTheClock {
+function startTheClock() {
   var csa = '"style="position:absolute;top:0px;left:0px;width:16px;height:16px;font-family:Arial,sans-serif;font-size:16px;text-align:center;font-weight:bold;color:';
   var csb = '"style="position:absolute;top:0px;left:0px;width:10px;height:10px;font-family:Arial,sans-serif;text-align:center;font-size:10px;color:';
   var csc = '"style="position:absolute;top:0px;left:0px;width:10px;height:10px;font-family:Arial, sans-serif;text-align:center;font-size:';
