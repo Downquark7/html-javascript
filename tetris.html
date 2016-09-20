@@ -1,4 +1,484 @@
 <html>
+  <head>
+    <title>TETRIS!</title>
+    <style>
+      div {
+  text-align: center;
+  border: 1px solid blue;
+  position: absolute;
+  display: inline;
+}
+
+canvas {
+  text-align: left;
+  width: 400px;
+  border: 1px solid blue;
+}
+    </style>
+    <script>
+      function gridChooser(gridNumber) {
+  switch (gridNumber) {
+    case 1:
+      return [
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+      ];
+      break;
+    case 2:
+      return [
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+      ];
+      break;
+    case 3:
+      return [
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9],
+        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+      ];
+      break;
+  }
+}
+
+
+function blankGrid() {
+  if (0) {
+    document.getElementById("tutorial").width = document.getElementById("tutorial").height * (gridChooser(gridNum)[0].length / gridChooser(gridNum).length);
+  } else {
+    document.getElementById("tutorial").height = document.getElementById("tutorial").width * (gridChooser(gridNum).length / gridChooser(gridNum)[0].length);
+  }
+  return gridChooser(gridNum);
+}
+
+var gridNum = 1;
+var score = 0;
+var lines = 0;
+var fails = 0;
+var totalscore = 0;
+var hackGravity = false;
+var hackControls = false;
+var speed = 500;
+
+var grid = blankGrid();
+
+var canvas = document.getElementById('tutorial');
+var ctx = canvas.getContext('2d');
+var padd = 0.08;
+var colors = ['black', 'red', 'orange', 'yellow', 'green', 'blue', 'red', 'red', 'red', 'grey'];
+
+var gravity = false;
+var borderSize = 0; //change to 2 to hide grey border
+
+function h(input) {
+  return ((input - borderSize) / (grid.length - borderSize * 2)) * canvas.height;
+}
+
+function h2(input) {
+  return ((input - borderSize) / (grid.length - borderSize * 2)) * canvas.height + 100;
+}
+
+function w(input) {
+  return ((input - borderSize) / (grid[0].length - borderSize * 2)) * canvas.width;
+}
+
+function updateBoard() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  for (by = borderSize; by < grid.length - borderSize; by++) {
+    for (bx = borderSize; bx < grid[by].length - borderSize; bx++) {
+      ctx.fillStyle = colors[grid[by][bx]];
+      ctx.fillRect(w(bx + padd), h(by + padd), w(1 + borderSize - (2 * padd)), h(1 + borderSize - (padd * 2)));
+    }
+  }
+}
+
+updateBoard();
+
+function tetris(yinput) {
+  for (gy = yinput; gy > 3; gy--) {
+    for (gx = 2; gx < grid[gy].length - 2; gx++) {
+      grid[gy][gx] = grid[gy - 1][gx];
+    }
+  }
+  for (gx = 2; gx < grid[0].length - 2; gx++) {
+    for (gy = grid.length - 3; gy > 3; gy--) {
+      if ((grid[gy - 1][gx - 1] == 0 || grid[gy - 1][gx - 1] == 9) && (grid[gy - 1][gx + 1] == 0 || grid[gy - 1][gx + 1] == 9) && (grid[gy][gx] == 0)) {
+        grid[gy][gx] = grid[gy - 1][gx];
+      }
+    }
+  }
+}
+
+function checkRows() {
+  for (by = grid.length - 3; by > 1; by--) {
+    for (bx = 2; bx < grid[0].length - 1; bx++) {
+      if (bx > grid[0].length - 3) {
+        tetris(by);
+        by++;
+        score++;
+        document.getElementById("lines").innerHTML = "Lines: " + score;
+        break;
+      }
+      if (grid[by][bx] == 0) {
+        break;
+      }
+    }
+  }
+}
+
+
+var piecesx = [
+  [3, 2, 3, 4],
+  [3, 2, 2, 4],
+  [3, 2, 4, 5],
+  [3, 2, 3, 4],
+  [3, 2, 3, 4],
+  [3, 2, 4, 4],
+  [3, 3, 4, 4]
+];
+var piecesy = [
+  [1, 1, 0, 1],
+  [1, 0, 1, 1],
+  [0, 0, 0, 0],
+  [1, 1, 0, 0],
+  [0, 0, 1, 1],
+  [1, 1, 1, 0],
+  [1, 0, 1, 0]
+];
+var piecex = [];
+var piecey = [];
+var oldpiecex = [];
+var oldpiecey = [];
+var olderpiecex = [];
+var olderpiecey = [];
+var pieceNum = Math.floor(Math.random() * piecesx.length);
+for (i = 0; i < 4; i++) {
+  piecex[i] = piecesx[pieceNum][i];
+  piecey[i] = piecesy[pieceNum][i];
+}
+for (i = 0; i < 4; i++) {
+  oldpiecex[i] = piecesx[pieceNum][i];
+  oldpiecey[i] = piecesy[pieceNum][i];
+}
+var piececolor = Math.floor(Math.random() * 5 + 1);
+transform(Math.floor((grid[0].length / 2) - 4), 0);
+
+
+function gravitySim() {
+  for (gx = 2; gx < grid[0].length - 2; gx++) {
+    for (gy = grid.length - 3; gy > 3; gy--) {
+      if (grid[gy - 1][gx] > 0 && (grid[gy][gx] == 0)) {
+        grid[gy][gx] = grid[gy - 1][gx];
+      }
+    }
+  }
+}
+
+function newPiece() {
+  window.scrollTo(0, 0);
+  document.getElementById("dashboard").style.positionTop = 0 + "px";
+  checkRows();
+  if (hackGravity) {
+    gravitySim();
+  }
+  if (piecey[0] < 4) {
+    grid = blankGrid();
+    totalscore = totalscore + score;
+    score = 0;
+    fails = fails + 1;
+    //speed = 1000 * fails / totalscore;
+    document.getElementById("fails").innerHTML = "Games: " + fails;
+    document.getElementById("speedMeter").innerHTML = "Speed: " + speed;
+    document.getElementById("completescore").innerHTML = "Total Score: " + totalscore;
+    pause();
+    pause();
+  }
+  pieceNum = Math.floor(Math.random() * piecesx.length);
+  for (i = 0; i < 4; i++) {
+    piecex[i] = piecesx[pieceNum][i];
+    piecey[i] = piecesy[pieceNum][i];
+  }
+  piececolor = Math.floor(Math.random() * 5 + 1);
+  transform(Math.floor((grid[0].length / 2) - 4), 0);
+}
+
+
+
+function height() {
+  var body = document.body,
+    html = document.documentElement;
+  return Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight);
+}
+
+function transform(x, y) {
+  if (h2(piecey[0]) < canvas.height) {
+    window.scrollTo(0, h2(piecey[0]));
+  }
+  if (h2(piecey[0]) + window.innerHeight > height()) {
+    document.getElementById("dashboard").style.top = height() - window.height;
+  } else {
+    document.getElementById("dashboard").style.top = h2(piecey[0]) + "px";
+  }
+  for (i = 0; i < 4; i++) {
+    grid[piecey[i]][piecex[i]] = 0;
+    piecex[i] = piecex[i] + x;
+    piecey[i] = piecey[i] + y;
+  }
+  if (hackControls) {
+    avoidBlocks(-1);
+  } else {
+    if (y < 0) {
+      avoidBlocks(1);
+    }
+    if (x > 0) {
+      avoidBlocks(2);
+    }
+    if (y > 0) {
+      avoidBlocks(3);
+    }
+    if (x < 0) {
+      avoidBlocks(4);
+    }
+  }
+}
+
+function rotate(x, y, xm, ym, a) {
+  var cos = Math.cos,
+    sin = Math.sin,
+
+    a = a * Math.PI / 180, // Convert to radians because that is what
+    // JavaScript likes
+
+    // Subtract midpoints, so that midpoint is translated to origin
+    // and add it in the end again
+    xr = (x - xm) * cos(a) - (y - ym) * sin(a) + xm,
+    yr = (x - xm) * sin(a) + (y - ym) * cos(a) + ym;
+
+  return [xr, yr];
+}
+
+function avoidBlocks(direction) {
+  var d = direction;
+  var spawnNewPiece = false;
+  for (i = 0; i < 4; i++) {
+    olderpiecex[i] = oldpiecex[i];
+    olderpiecey[i] = oldpiecey[i];
+    oldpiecex[i] = piecex[i];
+    oldpiecey[i] = piecey[i];
+  }
+  for (i = 0; i < 4; i++) {
+    if (grid[piecey[i]][piecex[i]] > 0 && grid[Math.abs(piecey[i] - 1)][piecex[i]] == 0 && (d == 0 || d == 3)) {
+      for (o = 0; o < 4; o++) {
+        piecey[o] = piecey[o] - 1;
+      }
+      spawnNewPiece = true;
+    }
+  }
+  for (i = 0; i < 4; i++) {
+    if (grid[piecey[i]][piecex[i]] > 0 && grid[piecey[i]][piecex[i] + 1] == 0 && (d < 1 || d == 4)) {
+      for (o = 0; o < 4; o++) {
+        piecex[o] = piecex[o] + 1;
+      }
+    }
+  }
+  for (i = 0; i < 4; i++) {
+    if (grid[piecey[i]][piecex[i]] > 0 && grid[piecey[i]][piecex[i] - 1] == 0 && (d < 1 || d == 2)) {
+      for (o = 0; o < 4; o++) {
+        piecex[o] = piecex[o] - 1;
+      }
+    }
+  }
+
+  for (i = 0; i < 4; i++) {
+    if (piecey[i] == 0 || grid[piecey[i]][piecex[i]] > 0 && grid[piecey[i] + 1][piecex[i]] == 0 && (d < 1 || d == 1)) {
+      for (o = 0; o < 4; o++) {
+        piecey[o] = piecey[o] + 1;
+      }
+    }
+  }
+  for (i = 0; i < 4; i++) {
+    if (grid[piecey[i]][piecex[i]] > 0 && grid[Math.abs(piecey[i] - 1)][piecex[i]] == 0 && (d < 0)) {
+      for (o = 0; o < 4; o++) {
+        piecey[o] = piecey[o] - 1;
+      }
+      spawnNewPiece = true;
+    }
+  }
+  for (i = 0; i < 4; i++) {
+    grid[piecey[i]][piecex[i]] = piececolor;
+  }
+  updateBoard();
+  if (spawnNewPiece) {
+    if (d > 0) {
+      newPiece();
+    }
+    if (d < 0) {
+      for (i = 0; i < 4; i++) {
+        if (oldpiecex[i] == piecex[i] || oldpiecey[i] == piecey[i] || olderpiecex[i] == piecex[i] || olderpiecey[i] == piecey[i]) {
+          newPiece();
+          break;
+        }
+      }
+    }
+  }
+}
+
+document.onkeydown = checkKey;
+
+
+function rotatePiece(angle) {
+  for (i = 0; i < 4; i++) {
+    grid[piecey[i]][piecex[i]] = 0;
+    targetCoords = rotate(piecex[i], piecey[i], piecex[0], piecey[0], angle);
+    piecex[i] = targetCoords[0];
+    piecey[i] = targetCoords[1];
+  }
+  avoidBlocks(0);
+}
+
+var gravityInt = setInterval();
+var pieceSpawn = setInterval();
+
+function pause() {
+  clearInterval(pieceSpawn);
+  if (gravity) {
+    gravity = false;
+    clearInterval(gravityInt);
+  } else {
+    gravityInt = setInterval("transform(0,1);", speed);
+    gravity = true;
+  }
+}
+
+
+function checkKey(e) {
+
+  e = e || window.event;
+
+  if (e.keyCode == '38') {
+    // up arrow
+  } else if (e.keyCode == '40') {
+    // down arrow
+    transform(0, 1);
+  } else if (e.keyCode == '37') {
+    // left arrow
+    transform(-1, 0);
+  } else if (e.keyCode == '39') {
+    // right arrow
+    transform(1, 0);
+  } else if (e.keyCode == '90') {
+    // Z
+    rotatePiece(-90);
+  } else if (e.keyCode == '88') {
+    // X
+    rotatePiece(90);
+  } else if (e.keyCode == '32') {
+    // space
+    newPiece();
+  }
+
+
+
+}
+    </script>
+  </head>
+<body>
 <canvas onclick="pause();" id="tutorial">
   canvas fail</canvas>
 <div id="dashboard">
@@ -69,3 +549,5 @@
   </button>
   <br>
 </div>
+</body>
+</html>
