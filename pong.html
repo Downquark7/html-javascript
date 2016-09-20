@@ -1,0 +1,480 @@
+<html>
+  <head>
+    <title>PONG!</title>
+    <style>
+      html {
+  width: 100%;
+  height: 100vh;
+}
+
+body {
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+}
+
+div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100vh;
+}
+
+canvas {
+  outline: navy 1vmin solid;
+  display: block;
+}
+    </style>
+    <script>
+      var read = false;
+window.addEventListener("gamepadconnected", function(e) {
+	var gp = navigator.getGamepads()[e.gamepad.index];
+  var read = true;
+});
+window.addEventListener("gamepaddisconnected", function(e) {
+  var read = false;
+});
+
+function game() {
+    if (gp.buttons[1].pressed) {
+      o = 1;
+    } else {
+      o = 0;
+    }
+    if (gp.buttons[0].pressed) {
+      l = 1;
+    } else {
+      l = 0;
+    }
+    p2 = false;
+};
+
+
+
+
+
+var p1 = true;
+var p2 = true;
+
+window.addEventListener("keydown", function(e) {
+  if (e.defaultPrevented) {
+    return; // Should do nothing if the key event was already consumed.
+  }
+  switch (e.code) {
+    case "ArrowDown":
+      dArrow = true;
+      break;
+    case "ArrowUp":
+      uArrow = true;
+      break;
+    case "ArrowLeft":
+      lArrow = true;
+      break;
+    case "ArrowRight":
+      rArrow = true;
+      break;
+    case "KeyQ":
+      q = true;
+      p1 = false;
+      break;
+    case "KeyA":
+      a = true;
+      p1 = false;
+      break;
+    case "KeyO":
+      o = true;
+      p2 = false;
+      break;
+    case "KeyL":
+      l = true;
+      p2 = false;
+      break;
+    case "Enter":
+      draw = true;
+      break;
+    case "Escape":
+      p1 = true;
+      p2 = true;
+      draw = false;
+      break;
+    default:
+      return;
+  }
+  // Consume the event for suppressing "double action".
+  e.preventDefault();
+}, true);
+
+
+window.addEventListener("keyup", function(e) {
+  switch (e.code) {
+    case "ArrowDown":
+      dArrow = false;
+      break;
+    case "ArrowUp":
+      uArrow = false;
+      break;
+    case "ArrowLeft":
+      lArrow = false;
+      break;
+    case "ArrowRight":
+      rArrow = false;
+      break;
+    case "KeyQ":
+      q = false;
+      break;
+    case "KeyA":
+      a = false;
+      break;
+    case "KeyO":
+      o = false;
+      break;
+    case "KeyL":
+      l = false;
+      break;
+    case "Enter":
+
+      break;
+    case "Escape":
+      // Do something for "esc" key press.
+      break;
+    default:
+      return; // Quit when this doesn't handle the key event.
+  }
+}, true);
+
+var canvas = document.getElementById("canvas");
+canvas.width = ~~(.9 * window.innerWidth);
+canvas.height = ~~(.9 * window.innerHeight);
+var canvasbox = canvas.getBoundingClientRect();
+var context = canvas.getContext("2d");
+var otherCanvas = document.createElement("canvas");
+otherCanvas.width = canvas.width;
+otherCanvas.height = canvas.height;
+var ctxTwo = otherCanvas.getContext("2d");
+//ctxTwo.fillStyle = "#ffffff";
+//ctxTwo.fillRect(0, 0, otherCanvas.width, otherCanvas.height);
+var ballCanvas = document.createElement("canvas");
+ballCanvas.width = canvas.width;
+ballCanvas.height = canvas.height;
+var ctxB = ballCanvas.getContext("2d");
+
+var paddleOffset = canvas.width / 100;
+var ballRadius = canvas.width / 40;
+var paddleWidth = canvas.width / 20;
+var paddleLength = canvas.height / 3;
+var paddle1y = canvas.height / 2;
+var paddle2y = canvas.height / 2;
+var paddle1v = 0;
+var paddle2v = 0;
+var paddleSpeed = 0.1;
+var derivativex = 0;
+var derivativey = 0;
+var previousErrorx = 0;
+var previousErrory = 0;
+var dgain = 100;
+var score1 = 0;
+var score2 = 0;
+
+var q = false;
+var a = false;
+var o = false;
+var l = false;
+var speed = .1;
+sqrtTwo = speed / Math.sqrt(2);
+var colourCount = 0;
+var redValue = 127;
+var greenValue = 127;
+var blueValue = 127;
+dArrow = false;
+uArrow = false;
+lArrow = false;
+rArrow = false;
+var xVel = 10 * Math.random() - 5;
+var yVel = 10 * Math.random() - 5;
+var xbPos = canvas.width / 2;
+var ybPos = canvas.height / 2;
+var xaPos = canvas.width / 2;
+var yaPos = canvas.height / 2;
+var draw = true;
+window.requestAnimationFrame(doTrail);
+
+function doTrail() {
+  if(read)game();
+  xbPos = xaPos;
+  ybPos = yaPos;
+  /* sqrtTwo is a variable that was defined earlier to reduce
+  the strain on the cpu slightly by calculating the value of the
+  square root of two only once. */
+  if (rArrow) {
+    if (dArrow) {
+      if (lArrow) {
+        if (uArrow) {} else {
+          yVel += speed;
+        }
+      } else if (uArrow) {
+        xVel += speed;
+      } else {
+        xVel += sqrtTwo;
+        yVel += sqrtTwo;
+      }
+    } else if (lArrow) {
+      if (uArrow) {
+        xVel -= speed;
+      } else {}
+    } else if (uArrow) {
+      xVel += sqrtTwo;
+      yVel -= sqrtTwo;
+    } else {
+      xVel += speed;
+    }
+  } else if (dArrow) {
+    if (lArrow) {
+      if (uArrow) {
+        xVel -= speed;
+      } else {
+        yVel += sqrtTwo;
+        xVel -= sqrtTwo;
+      }
+    } else if (uArrow) {} else {
+      yVel += speed;
+    }
+  } else if (lArrow) {
+    if (uArrow) {
+      xVel -= sqrtTwo;
+      yVel -= sqrtTwo;
+    } else {
+      xVel -= speed;
+    }
+  } else if (uArrow) {
+    yVel -= speed;
+  }
+
+  paddle1y += paddle1v;
+  paddle2y += paddle2v;
+  xVel *= 1.0001;
+  yVel *= 1.0001;
+  xaPos += xVel;
+  yaPos += yVel;
+  paddle1v *= 0.99;
+  paddle2v *= 0.99;
+  derivativey = (yaPos - previousErrory);
+  derivativex = (xaPos - previousErrorx);
+
+  if (q) {
+    paddle1v -= paddleSpeed;
+  }
+  if (a) {
+    paddle1v += paddleSpeed;
+  }
+  if (o) {
+    paddle2v -= paddleSpeed;
+  }
+  if (l) {
+    paddle2v += paddleSpeed;
+  }
+
+
+  function derive3() { //bottom
+    return xaPos + (derivativex / derivativey) * (canvas.height - yaPos - ballRadius);
+  }
+
+  function derive4() { //top
+    return xaPos + (derivativex / derivativey) * (ballRadius - yaPos);
+  }
+
+  function derive2() { //left
+    return yaPos + (derivativey / -derivativex) * (xaPos - paddleOffset - paddleWidth - ballRadius);
+  }
+
+  function derive() { //right
+    return yaPos + (derivativey / derivativex) * (canvas.width - xaPos - paddleOffset - paddleWidth - ballRadius);
+  }
+
+  function derive6() { //right bounce
+    if (derivativey > 0) {
+      return canvas.height - ballRadius + (derivativey / -derivativex) * Math.abs(canvas.width - derive3() - paddleOffset - paddleWidth - ballRadius);
+    } else {
+      return ballRadius + (derivativey / -derivativex) * Math.abs(canvas.width - derive4() - paddleOffset - paddleWidth - ballRadius);
+    }
+  }
+
+  function derive5() { //left bounce
+    if (derivativey > 0) {
+      return canvas.height - ballRadius + (derivativey / derivativex) * Math.abs(derive3() - paddleOffset - paddleWidth - ballRadius);
+    } else {
+      return ballRadius + (derivativey / derivativex) * Math.abs(derive4() - paddleOffset - paddleWidth - ballRadius);
+    }
+  }
+  if (p2) {
+    if (paddle2y > derive6()) {
+      paddle2v -= paddleSpeed;
+    } else if (paddle2y < derive6()) {
+      paddle2v += paddleSpeed;
+    }
+  }
+  if (p1) {
+    if (paddle1y > derive5()) {
+      paddle1v -= paddleSpeed;
+    } else if (paddle1y < derive5()) {
+      paddle1v += paddleSpeed;
+    }
+  }
+  previousErrory = yaPos;
+  previousErrorx = xaPos;
+
+
+  if (xaPos > otherCanvas.width - paddleOffset - paddleWidth - ballRadius) {
+    xaPos = otherCanvas.width - paddleOffset - paddleWidth - ballRadius;
+    xVel *= -1;
+    yVel += paddle2v;
+    if (yaPos > paddle2y + paddleLength / 2 || yaPos < paddle2y - paddleLength / 2) {
+      xVel = 8 * Math.random() - 4;
+      yVel = 8 * Math.random() - 4;
+      xbPos = canvas.width / 2;
+      ybPos = canvas.height / 2;
+      xaPos = canvas.width / 2;
+      yaPos = canvas.height / 2;
+      score1 += 1;
+      window.requestAnimationFrame(doTrail);
+    }
+  }
+  if (yaPos > otherCanvas.height - ballRadius) {
+    yaPos = otherCanvas.height - ballRadius;
+    yVel *= -1;
+  }
+  if (xaPos < paddleWidth + paddleOffset + ballRadius) {
+    xaPos = paddleWidth + paddleOffset + ballRadius;
+    xVel *= -1;
+    yVel += paddle1v;
+    if (yaPos > paddle1y + paddleLength / 2 || yaPos < paddle1y - paddleLength / 2) {
+      xVel = 8 * Math.random() - 4;
+      yVel = 8 * Math.random() - 4;
+      xbPos = canvas.width / 2;
+      ybPos = canvas.height / 2;
+      xaPos = canvas.width / 2;
+      yaPos = canvas.height / 2;
+      score2 += 1;
+      window.requestAnimationFrame(doTrail);
+    }
+  }
+  if (paddle1y < paddleLength / 2) {
+    paddle1y = paddleLength / 2;
+    paddle1v *= -0 //.5;
+  }
+  if (paddle1y > canvas.height - paddleLength / 2) {
+    paddle1y = canvas.height - paddleLength / 2;
+    paddle1v *= -0 //.5;
+  }
+  if (paddle2y < paddleLength / 2) {
+    paddle2y = paddleLength / 2;
+    paddle2v *= -0 //.5;
+  }
+  if (paddle2y > canvas.height - paddleLength / 2) {
+    paddle2y = canvas.height - paddleLength / 2;
+    paddle2v *= -0 //.5;
+  }
+  if (yaPos < ballRadius) {
+    yaPos = ballRadius;
+    yVel *= -1;
+  }
+  if (false) {
+    ctxTwo.lineJoin = "miter";
+    ctxTwo.lineCap = "square";
+    ctxTwo.beginPath();
+    ctxTwo.moveTo(Math.floor(xbPos + .5) + .5, Math.floor(ybPos + .5) + .5);
+    ctxTwo.lineTo(Math.floor(xaPos + .5) + .5, Math.floor(ybPos + .5) + .5);
+    ctxTwo.lineTo(Math.floor(xaPos + .5) + .5, Math.floor(yaPos + .5) + .5);
+    ctxTwo.lineTo(Math.floor(xbPos + .5) + .5, Math.floor(yaPos + .5) + .5);
+    ctxTwo.lineTo(Math.floor(xbPos + .5) + .5, Math.floor(ybPos + .5) + .5);
+    ctxTwo.strokeStyle = "#aa00ff";
+    ctxTwo.lineWidth = 1;
+    ctxTwo.stroke();
+    ctxTwo.closePath();
+  }
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  ctxB.clearRect(0, 0, canvas.width, canvas.height);
+  context.drawImage(otherCanvas, 0, 0);
+  ctxB.beginPath();
+  ctxB.arc(xaPos, yaPos, ballRadius, 0, Math.PI * 2, true);
+  ctxB.strokeStyle = "#aa00ff";
+  ctxB.lineWidth = canvas.width / 100;
+  ctxB.stroke();
+
+  /*
+  ctxB.beginPath();
+  ctxB.arc(xaPos + derivativex * dgain, yaPos + derivativey * dgain, ballRadius, 0, Math.PI * 2, true);
+  ctxB.strokeStyle = "#ff00aa";
+  ctxB.lineWidth = canvas.width / 100;
+  ctxB.stroke();
+	*/
+  if (draw) {
+
+    if (xVel > 0) {
+      ctxB.beginPath();
+      ctxB.arc(canvas.width - paddleOffset - paddleWidth - ballRadius, derive(), ballRadius, 0, Math.PI * 2, true);
+      ctxB.strokeStyle = "#ff00aa";
+      ctxB.stroke();
+    } else {
+      ctxB.beginPath();
+      ctxB.arc(paddleOffset + paddleWidth + ballRadius, derive2(), ballRadius, 0, Math.PI * 2, true);
+      ctxB.strokeStyle = "#ff00aa";
+      ctxB.stroke();
+    }
+
+
+    if (yVel > 0) {
+      ctxB.beginPath();
+      ctxB.arc(derive3(), canvas.height - ballRadius, ballRadius, 0, Math.PI * 2, true);
+      ctxB.strokeStyle = "#ff00aa";
+      ctxB.stroke();
+    } else {
+      ctxB.beginPath();
+      ctxB.arc(derive4(), ballRadius, ballRadius, 0, Math.PI * 2, true);
+      ctxB.strokeStyle = "#ff00aa";
+      ctxB.stroke();
+    }
+
+
+    ctxB.beginPath();
+    ctxB.arc(paddleOffset + paddleWidth + ballRadius, derive5(), ballRadius, 0, Math.PI * 2, true);
+    ctxB.strokeStyle = "#00aaaa";
+    ctxB.stroke();
+
+    ctxB.beginPath();
+    ctxB.arc(canvas.width - paddleOffset - paddleWidth - ballRadius, derive6(), ballRadius, 0, Math.PI * 2, true);
+    ctxB.strokeStyle = "#00aaaa";
+    ctxB.stroke();
+  }
+
+
+  ctxB.strokeStyle = "#00aaff";
+  ctxB.strokeRect(paddleOffset, paddle1y - paddleLength / 2, paddleWidth, paddleLength);
+
+  ctxB.strokeStyle = "#00ffaa";
+  ctxB.strokeRect(canvas.width - paddleOffset - paddleWidth, paddle2y - paddleLength / 2, paddleWidth, paddleLength);
+  ctxB.closePath();
+
+  ctxB.font = (paddleWidth / 2) + "px verdana";
+  ctxB.fillStyle = "#00aaff";
+  ctxB.textAlign = "center";
+  ctxB.fillText("" + score1, paddleOffset + paddleWidth / 2, paddle1y);
+
+  ctxB.font = (paddleWidth / 2) + "px verdana";
+  ctxB.fillStyle = "#00ffaa";
+  ctxB.textAlign = "center";
+  ctxB.fillText("" + score2, canvas.width - paddleOffset - paddleWidth / 2, paddle2y);
+
+  context.drawImage(ballCanvas, 0, 0);
+  window.requestAnimationFrame(doTrail);
+
+}
+    </script>
+  </head>
+<body>
+<label></label>
+<div>
+  <canvas id="canvas" width="0" height="0"></canvas>
+</div>
+</body>
+</html>
