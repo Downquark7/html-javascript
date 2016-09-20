@@ -26,7 +26,14 @@ canvas {
   display: block;
 }
     </style>
-    <script>
+    
+  </head>
+<body>
+<label></label>
+<div>
+  <canvas id="canvas" width="0" height="0"></canvas>
+</div>
+<script>
       var read = false;
 window.addEventListener("gamepadconnected", function(e) {
 	var gp = navigator.getGamepads()[e.gamepad.index];
@@ -470,11 +477,5 @@ function doTrail() {
 
 }
     </script>
-  </head>
-<body>
-<label></label>
-<div>
-  <canvas id="canvas" width="0" height="0"></canvas>
-</div>
 </body>
 </html>
