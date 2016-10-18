@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
 <body>
+<button onclick="myFunction()">
+  Connect to LED
+</button>
 
 <script>
 function log(text) {
@@ -9,14 +12,14 @@ function log(text) {
   node.appendChild(textnode);
   document.body.appendChild(node);
 }
-
+function myFunction() {
 navigator.usb.requestDevice({ filters: [{ vendorId: 0x04D8 }] })
 .then(device => {
   log(device.productName);
   log(device.manufacturerName);
-})
+ })
 .catch(error => { log(error); });
-
+}
 </script>
 
 
