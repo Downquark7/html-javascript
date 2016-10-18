@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<script>
+function log(text) {
+  var node = document.createElement('div');
+  var textnode = document.createTextNode(text);
+  node.appendChild(textnode);
+  document.body.appendChild(node);
+}
+
+navigator.usb.requestDevice({ filters: [{ vendorId: 0x04D8 }] })
+.then(device => {
+  log(device.productName);
+  log(device.manufacturerName);
+})
+.catch(error => { log(error); });
+
+</script>
+
+
+</body>
+</html>
