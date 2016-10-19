@@ -13,7 +13,7 @@ function log(text) {
   document.body.appendChild(node);
 }
 function myFunction() {
-navigator.usb.getDevices({ filters: [{ vendorId: 0x04D8 }] })
+navigator.usb.requestDevice({ filters: [{ vendorId: 0x04D8 }] })
 .then(device => {
   log(device.productName);
   log(device.manufacturerName);
