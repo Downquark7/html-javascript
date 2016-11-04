@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html style="width:100%;height:100%">
+
+  <body style="width:100%;height:100%;margin:0">
+    <div style="height:100%;min-height:0;margin:0;padding:0;display:flex;flex-flow:row">
+      <div style="flex:1 1 0%;margin:0;padding:0;display:flex;flex-flow:column;min-width:0">
+        <div style="flex:.5 1 0%;display:flex;flex-flow:row;background-color:#ff5500">
+          <input style="flex:1 1 0%;opacity:0" type="file" id="myFile" multiple size="5" onchange="handleFiles(this.files[0])">
+        </div>
+        <div style="flex:1 1 0%;margin:0;padding:0;display:flex;flex-flow:row">
+          <button style="flex:5 1 0%" onclick="update();iframe.src='data:text/html;base64,'+btoa(getCode(codeSpace.childNodes));link.href=iframe.src;hljs.highlightBlock(codeSpace);">&lt;3</button>
+          <button style="flex:1 1 0%" onclick="update();prompt('Here is the URL','data:text/html;base64,'+btoa(getCode(codeSpace.childNodes)));hljs.highlightBlock(codeSpace);">&lt;3</button>
+        </div>
+        <div style="flex:.5 1 0%;margin:0;padding:0;display:flex;flex-flow:row">
+          <button style="flex:1 1 0%" onclick="if(sessionStorage.code){rmCode(codeSpace.childNodes);codeSpace.appendChild(document.createTextNode(atob(sessionStorage.code)))};update();hljs.highlightBlock(codeSpace);">Load</button>
+          <button style="flex:1 1 0%" onclick="update();sessionStorage.code=btoa(getCode(codeSpace.childNodes))">Temp. Save</button>
+        </div><pre style="width:100%;min-width:0;flex:8 1 0%;white-space:pre-wrap;display:inline-block;overflow-y:scroll;margin:0%"><code id="codeSpace" style="display:inline-block;width:100%;min-height:100%" contenteditable="true" spellcheck="false">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;body&gt;
+
+&lt;span&gt;hi&lt;/span&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</code></pre></div>
+      <div style="flex:1 1 0%;margin:0;padding:0;display:flex;flex-flow:column">
+        <iframe id="iframe" style="flex:9 1 0%"></iframe>
+        <a id="link" style="flex:1 1 0%;background-color:#aa00ff" download="html-file"></a>
+      </div>
+    </div>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/styles/obsidian.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/highlight.min.js"></script>
+    <script>
+      var codeSpace = document.getElementById("codeSpace");
+      console.log(codeSpace);
+      var iframe = document.getElementById("iframe");
+      var link = document.getElementById("link");
+
+      function getCode(toGet) {
+        var rawCode = "";
+        for (var i = 0; i < toGet.length; i++) {
+          rawCode += toGet[i].data
+        }
+        return rawCode
+      }
+
+      function update() {
+        codeSpace.innerText = codeSpace.innerText;
+      }
+
+      function rmCode(toKill) {
+        while (toKill.length > 0) {
+          toKill[0].parentNode.removeChild(toKill[0])
+        }
+      }
+
+      function handleFiles(file) {
+        var reader = new FileReader();
+        reader.onload = function() {
+          rmCode(codeSpace.childNodes);
+          codeSpace.appendChild(document.createTextNode(reader.result))
+        };
+        reader.readAsText(file);
+      }
+
+    </script>
+
+  </body>
+
+</html>
+
