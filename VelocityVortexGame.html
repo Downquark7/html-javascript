@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+div {
+  position: relative;
+}
+
+* {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #00aaff
+}
+
+img {
+  display: none
+}
+</style>
+</head>
+<body>
+<canvas id="canvas" style="border: 1px solid blue;"></canvas>
+<img id="vortex" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAdgAAAF+CAYAAAAhnAtqAAAGPklEQVR42u3d0W3CMBRAUVtiCbZiClggY7BAmYJOlTFcoB9FVESlJLHzco7oVyFUrsnVi5R2U1K6PMaXbw+Wzv4g2I4u0xw328/2xS8bCwsAAgsAAgsAAgsACCwACCwACCwAILAAILAAILAAgMACgMACgMACAAILAAILAAILAAgsAAgsAAgsACCwACCwACCwAIDAAoDAAoDAAgACCwACCwACCwAILAAILAAILAAILAAgsAAgsAAgsACAwAKAwAKAwAIAAgsAAgsAAgsACCwACCwACCwAILAAILAAILAAgMACgMACgMACAAILAAILAAILAAgsAAgsAAgsACCwACCwACCwACCwAIDAAoDAAoDAAgACCwACCwACCwAILAAILAAILAAgsAAgsAAgsACAwAKAwAKAwAIAAgsAAgsAAgsACCwACCwACCwAILBv26dUhr5/SilbJWCRtvvB81vqT85vAjtvVJ89V2yBxUf12XPFVmDnCuvQ64UWWHRYh14vtAI7Z1iFFggbVqEV2Fbi+nhskQXCxPXx2CIrsDXiKrJA2LiKrMDWjqvIAmHjKrICWzuuIguEjavICmztuIosEDauIiuwACCwAadXUywQdno1xQosAAhswOnVFAuEnV5XPsWaYAFAYAFAYJvW0uXh+5/JZWLgbS1dHr7/mVZ2mdgECwACCwACCwACCwAILAAILAAILAAgsP91vd+0tXth3QMLjOJ6v2lr98L6U4kAgMACgMC2p6XLxC4PA6Nq6TKx/wcLAAhsoCnW9AqEnWJXOr0KLAAsLbClwX8HN+RQ6X0/vr+KrQhLVtr9DPeXr22lM1x/O8Ot9vxmgr0L3aHCewLMErq5I9s7wwlspcjaekDYyIqrwNaKrK0HhI2suApsrcjaekDYyIqrwL4SwsPIxwNoIrJXY4VWWAW2RmhtOyBsaIVVYMeeQA8vPBdgMaH9S2xFVWDnii1A2NgisAAgsAAgsACAwAKAwAKAwAIAAgsAAgsAAgsACCwACCwACCwAILAAMGtgc0rZMvwot8f4Po/W9t55onWGYU53V7tu6o9fttAmWAAQWAAQWAAQWABAYAFAYAFAYAEAgQUAgQUAgQUABBYABBYABBYAEFgAEFgAEFgAQGABQGABQGABAIEFAIEFAIENKd8eE+isLc+dj6lMcdxdN9F+ZvlnOgQWAAQWABBYABBYABBYABBYAEBgAUBgAUBgAQCBBQCBBQCBBQAEFgAEFgAEFgAQWAAQWAAQWABAYAFAYAFAYAEAgQUAgQUAgQUABBYABBYABBYAEFgAEFgAEFgAQGABQGABQGABQGABAIEFAIEFAIEFAAQWAAQWAAQWABBYABBYABBYAEBgAUBgAUBgAQCBBQCBBQCBBQAEFgAEFgAEFgAQWAAQWAAQWABAYAFAYAFAYAEAgQUAgQUAgQUABBYABBYABBYABBYAEFgAEFgAEFgAQGABQGABQGABAIEFAIEFAIEFAAQWAAQWAAQWABBYABBYABBYAEBgAUBgAUBgAQCBBQCBBQCBBQAEFgAEFgAEFgAQWAAQWAAQWAAQWABAYAFAYAFAYAEAgQUAgQUAgQUABBYABBYABBYAEFgAEFgAEFgAQGABQGABQGABAIEFAIEFAIEFAAQWAAQWAAQWABBYABBYABBYAEBgAUBgAUBgAUBgAQCBBQCBBQCBBQAEFgAEFgAEFgAQWAAQWAAQWABAYAFAYAFAYAEAgQUAgQUAgQUABBYABBYABBYAEFgAEFgAEFgAQGABQGABQGABAIEFAIEFAIEFAIEFAAQWAAQWAAQWABBYABBYABBYAEBgAUBgAUBgAQCBBQCBBQCBBQAEFgAEFgAEFgAQWAAQWAAQWABAYAFAYAFAYAEAgQUAgQUAgQUABBYABBYABBYABNYSAIDAAoDAAoDAAgACCwACCwACCwAILAAILAAILAAgsAAgsAAgsACAwAKAwAKAwAIAAgsAAgsAAgsACCwACCwACCwAILAAILAAILAAgMACgMACgMASyvmYilXw+2PYrkvZKiCwACCwACCwAIDAAoDAAoDAAoDAAgACCwACCwACCwAILAAILAAILAAgsAAgsAAgsACAwAKAwAKAwAIAAgsAAgsAAX0Bl0i/Tp+zBzQAAAAtdEVYdFNvZnR3YXJlAGJ5LmJsb29kZHkuY3J5cHRvLmltYWdlLlBORzI0RW5jb2RlcqgGf+4AAAAASUVORK5CYII=">
+<img id="robotneutral" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKgAAAC0CAYAAAAAX2dUAAABv0lEQVR42u3csQ3DIBBAUZC8F2wWj3abES/ggkiOOfFencLAFxTYOcqkiBgFftR7rzO/P0wZKxMoAgWBIlAQKAgUgYJAESgIFF4KdPbulVyefjfDDoojHgSKQEGgIFAECgJFoCBQECgCBYEiUBAoCBSBgkARKAgUBIpAQaAI1BQgUBAoAgWBgkARKAgUgYJAQaAIFASKQEGgIFAECgJFoCBQECgCBYEiUBAoCBSBgkBBoAgUBIpAQaAgUAQKAkWgIFAQKAIFgSJQECgIFIGCQBEoCBQEikBBoCBQBAoCRaAgUBAoAgWBIlAQKAgUgYJAESgIFASKQEGgCBQECgJFoCBQECgCBYEiUBAoCBSBgkARKAgU3g00IoZpxg6KQEGgIFAECgJFoCBQECgCBYEi0HuttaUGUC+W8d642EFBoAgUBAoCRaAgUAQKAgWBIlD4c6Bnyf3d+uzzn6VuNd7kz28HxREPAkWgIFAQKAIFgSJQECgIlJSBzt5Nfxa7C85+t/70eJOvlx0URzwIFIGCQEGgCBQEikBBoCBQdgh0+j/hd/tufTHZ18sOiiMeBIpAQaAgUAQKAkWgIFAQKAl9Ae0GIlJVOt4FAAAALXRFWHRTb2Z0d2FyZQBieS5ibG9vZGR5LmNyeXB0by5pbWFnZS5QTkcyNEVuY29kZXKoBn/uAAAAAElFTkSuQmCC">
+<img id="robotleft" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKgAAAC0CAYAAAAAX2dUAAABuklEQVR42u3bwQ2DMAxA0SCxV7IZsJk3S7uCK1UmynvnXpp8mYPhbEkRMRv8aIxxZH5/OjLeTKAIFASKQEGgIFAECgJFoCBQKAo0u3tlLf9+N8MExSMeBIpAQaAgUAQKAkWgIFAQKAIFgSJQECgIFIGCQBEoCBQEikBBoAjUESBQECgCBYGCQBEoCBSBgkBBoAgUBIpAQaAgUAQKAkWgIFAQKAIFgSJQECgIFIGCQEGgCBQEikBBoCBQBAoCRaAgUBAoAgWBIlAQKAgUgYJAESgIFASKQEGgIFAECgJFoCBQECgCBYEiUBAoCBSBgkARKAgUBIpAQaAIFAQKAkWgIFAQKAIFgSJQECgIFIGCQBEoCBRqA42I6ZgxQREoCBQEikBBoAgUBAoCRaAgULYK9G6pXXnv/VV/4Pja6saS9zWvuXigIFAQKAIFgYJAESgIFIGCQEGgLBjo3XK77Kv5zr3SZvdlgiJQECgCBYGCQBEoCBSBgkBBoAi0QPI78fQum9L7MkExQUGgCBQECgJFoCBQBAoCBYGyQ6DHk1xl232XWv2+TFA84kGgCBQECgJFoCBQBAoCBYGyoA+9HB3RIjT48AAAAC10RVh0U29mdHdhcmUAYnkuYmxvb2RkeS5jcnlwdG8uaW1hZ2UuUE5HMjRFbmNvZGVyqAZ/7gAAAABJRU5ErkJggg==">
+<img id="robotright" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKgAAAC0CAYAAAAAX2dUAAABvUlEQVR42u3b0Q3CIBRAUUi6F4yGm73N0AWMwaYBwjnfmijcPD5arjQoInqCP9Va88jnL0vGygSKQEGgCBQECgJFoCBQBAoChUmBjj57ZS9Pv5thguKIB4EiUBAoCBSBgkARKAgUBIpAQaAIFAQKAkWgIFAECgIFgSJQECgCtQQIFASKQEGgIFAECgJFoCBQECgCBYEiUBAoCBSBgkARKAgUBIpAQaAIFAQKAkWgIFAQKAIFgSJQECgIFIGCQBEoCBQEikBBoAgUBAoCRaAgUAQKAgWBIlAQKAgUgYJAESgIFASKQEGgCBQECgJFoCBQBAoCBYEiUBAoAgWBgkARKAgUBIpAQaAIFAQKAkWgIFAECgKFuYFGRLfMmKAIFAQKAkWgIFAECgIFgSJQECgC/a6UstQfyK889oWW8kkb3D+W+kEt9UcDBUc8CBSBgkARKAgUBIpAQaAIFAR632HP1k/bLxMUExQEikBBoCBQBAoCRaAgUBAoWwY6eE+ZyQ7bLxMUgYJAESgIFASKQEGgCBQECgJly0AH7ynn9vA1dO8G/Fqfo/bLBMURDwJFoCBQECgCBYEiUBAoCJQNvQFBmR5QKPN5fwAAAC10RVh0U29mdHdhcmUAYnkuYmxvb2RkeS5jcnlwdG8uaW1hZ2UuUE5HMjRFbmNvZGVyqAZ/7gAAAABJRU5ErkJggg==">
+<img id="bowl" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAtCAYAAABMDJJUAAAAi0lEQVR42u3awQ0AIAgAMUzcf2V1Bx+ItBMYc4EPMwpaRzQyjmpvngHCQlgIC4SFsBAWCAthISwQFsJCWCAsvg0r63yl4hlJt382sbAKERbCAmEhLIQFwkJYCAuEhbAQFgiLx8O6Ocnodr6SJeufb9owsbAKERbCAmEhLIQFwkJYCAuEhbAQFgiLt21vyhS1/b3abgAAAC10RVh0U29mdHdhcmUAYnkuYmxvb2RkeS5jcnlwdG8uaW1hZ2UuUE5HMjRFbmNvZGVyqAZ/7gAAAABJRU5ErkJggg==">
+<img id="redparticle" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEIAAABDCAYAAAAoCNNNAAAAl0lEQVR42u3bQQrAIAwEQAv+/8sWPPWm0hAizOIDZEgwoPYWlDFXXp654tKbgAABAgQIECBA5EBkT44R+zmZPlUECBAgQIAAAQLEX4hqE2P29KkiQIAAAQIECBAgQIAAAQIECBAgQIAAAQIECBAgQFwOsfvg6sarQY/JtAYIECBAgKgBsTqTfXfUGiBAgAABAgQIEALikxfXqA8Lo2NxuAAAAC10RVh0U29mdHdhcmUAYnkuYmxvb2RkeS5jcnlwdG8uaW1hZ2UuUE5HMjRFbmNvZGVyqAZ/7gAAAABJRU5ErkJggg==">
+<img id="blueparticle" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEYAAABFCAYAAAD3upAqAAAAl0lEQVR42u3cwQkAIAwEsAruv7Ku4KNo1dwAIqHCPYo90jNGbE9r2Sf2EDBgwIABAwYMmF9hTjTa7LutN2QTAwYMGDBgwIC5GKZycTtVBE0MGDBgwIABAwYMGDBgBAwYMGDAgAEDBgwYMAIGDBgwYMBUhlld8XxhK8I6q6cEBgwYMGDAgAGT1xp9YWBiwAgYMGDAgAFTMBM98w8TcK9u9AAAAC10RVh0U29mdHdhcmUAYnkuYmxvb2RkeS5jcnlwdG8uaW1hZ2UuUE5HMjRFbmNvZGVyqAZ/7gAAAABJRU5ErkJggg==">
+<img id="bluecap" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJEAAACOCAYAAAAxWOptAAABQElEQVR42u3a0QnAIAxAwQTcf+V0gtIfU5TcDSCij3xlxRWqYpTMm267AkSEiBARiAgRISJEBCJCRIgIEYGIEBEiQkQgIkSEiBDRu2n70B063rBvb9skQkSICBGBiBARIkJEICJEhIgQEYgIESEiRAQiQkQcFZF11hn6/tkkQkSICBGBiBARIkJEICJEhIgQEYgIESEiRAQiQkSICBGBiBARIkJEICJEhIgQEYgIESEiRAQiQkSICBGBiBARIkJEICJEhIgQEYgIESEiRAQiQkSICBGBiBARIkJEICJEhIgQEXxGlLn3yCrPeqLd/2wSISJEhIhARIgIESEiEBEiQkSICESEiBARIgIRISJEhIjgp4g6FsKnLf/3LdWbRIgIEYGIEBEiQkQgIkSEiBARiAgRISJEBCJCRIgIEYGI6PUAdVgQN8plDSoAAAAtdEVYdFNvZnR3YXJlAGJ5LmJsb29kZHkuY3J5cHRvLmltYWdlLlBORzI0RW5jb2RlcqgGf+4AAAAASUVORK5CYII=">
+<img id="redcap" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJcAAACYCAYAAADpyXusAAABVklEQVR42u3bOwrAIBBAwV3w/lc2YJXeD8rOYJ0iPtZGWzygj1VXjvWeFiAuxAXiQlyIC8SFuBAXiAtxIS4QF+JCXCAuxIW4QFyIC3GBuCgYV/UnYTf/xxPP1UwuxIW4QFyIC3GBuBAX4gJxIS7EBeJCXIgLxIW4EBeIC3EhLpiNywudmk7su8mFuBAXiAtxIS4QF+JCXCAuxIW4QFyIC3GBuBAX4gJxIS7EBeJCXIgLxIW4EBeIC3GBuBAX4gJxIS7EBeJCXIgLxIW4EBeIC3EhLhAX4kJcIC7EhbhAXIgLcYG4EBfiAnEhLhAX4kJc8I8rI3LXx/tY3GjnvptcOBYRF4gLcSEuEBfiQlwgLsSFuEBciAtxgbgQF+Kat+q2Y/UbrSdujZpciAvEhbgQF4gLcSEuEBfiQlwgLsSFuEBciAtxgbgQF+ICcSEuxAXiQlyIC1b6APFfEF+pWPjZAAAALXRFWHRTb2Z0d2FyZQBieS5ibG9vZGR5LmNyeXB0by5pbWFnZS5QTkcyNEVuY29kZXKoBn/uAAAAAElFTkSuQmCC">
+
+<script>
+window.onerror = function(e, url, line) {
+  var ertext = document.createElement('div');
+  var text = document.createTextNode('onerror: ' + e + ' URL:' + url + ' Line:' + (line - 61));
+  ertext.appendChild(text);
+  document.body.appendChild(ertext);
+  console.error('\nLine ' + (line - 61) + ':');
+  return true;
+}
+
+function log(txt) {
+  var ertext = document.createElement('div');
+  var text = document.createTextNode(txt);
+  ertext.appendChild(text);
+  document.body.appendChild(ertext);
+}
+
+var canvas = document.getElementById('canvas');
+canvas.width = window.innerWidth - 3;
+canvas.height = window.innerHeight - 3;
+if (canvas.height > canvas.width)
+  canvas.height *= 0.8;
+var ctx = canvas.getContext('2d');
+
+var starttime = 0;
+var endtime = 0;
+var score = 0;
+var highscore = 0;
+var grave = false;
+var minscoredist = 164;
+
+function timeremaining() {
+  return Math.floor((endtime - Date.now()) / 1000);
+}
+
+var leftarrow = false;
+var rightarrow = false;
+var launch = false;
+var gamepadx = 0;
+var gamepadint;
+
+var interval;
+
+var targets = [0, 0, 0, 0];
+
+interval = setInterval(pollGamepads, 1000);
+
+function pollGamepads() {
+  var gamepads = navigator.getGamepads ? navigator.getGamepads() : (navigator.webkitGetGamepads ? navigator.webkitGetGamepads : []);
+  for (var i = 0; i < gamepads.length; i++) {
+    var gp = gamepads[i];
+    if (gp) {
+      clearInterval(interval);
+      setInterval(getbuttons, 10);
+    }
+  }
+}
+
+function getbuttons() {
+  var gamepads = navigator.getGamepads ? navigator.getGamepads() : (navigator.webkitGetGamepads ? navigator.webkitGetGamepads : []);
+  if (!gamepads) {
+    return;
+  }
+  var gp = gamepads[0];
+  gamepadx = gp.axes[0];
+  if (gp.buttons[0] && gp.buttons[0].pressed) {
+    if (timeremaining() > 0)
+      launch = true;
+    else
+      reset();
+  }
+  if (Math.abs(gamepadx) < 0.1) {
+    gamepadx = 0;
+  }
+}
+
+var robot = {
+  x: canvas.width / 2,
+  v: 0,
+  y: 0,
+  xoffset: 0,
+  width: document.getElementById("robotneutral").width,
+  height: document.getElementById("robotneutral").height
+};
+
+var vortex = {
+  width: document.getElementById("vortex").width,
+  height: document.getElementById("vortex").height,
+  goalheight: 150
+};
+
+vortex.goalwidth = document.getElementById("bowl").width;
+vortex.minx = (canvas.width - vortex.width) / 2;
+vortex.maxx = (canvas.width + vortex.width) / 2;
+vortex.maxgoalx = (canvas.width - vortex.width) / 2 + vortex.goalwidth;
+vortex.mingoalx = (canvas.width + vortex.width) / 2 - vortex.goalwidth;
+vortex.miny = canvas.height - vortex.height;
+vortex.maxgoaly = vortex.miny + vortex.goalheight;
+vortex.bluex = (vortex.maxx + vortex.mingoalx) / 2;
+vortex.redx = (vortex.minx + vortex.maxgoalx) / 2;
+
+var ai = false;
+
+var ball = {
+  x: canvas.width / 2,
+  y: 0,
+  red: true,
+  end: false,
+  loaded: false,
+  launching: false,
+  vx: 0,
+  vy: 0
+};
+
+ball.cap = false;
+
+function reset() {
+  canvas.width = window.innerWidth - 3;
+  canvas.height = window.innerHeight - 3;
+  if (canvas.height > canvas.width)
+    canvas.height *= 0.8;
+  if (score > highscore)
+    highscore = score;
+  score = 0;
+  starttime = Date.now();
+  endtime = starttime + 120000;
+  ball = {
+    x: canvas.width / 2,
+    y: 0,
+    red: true,
+    end: false,
+    cap: false,
+    loaded: false,
+    launching: false,
+    vx: 0,
+    vy: 0
+  };
+  robot = {
+    x: canvas.width / 2,
+    v: 0,
+    y: canvas.height,
+    xoffset: 0,
+    width: document.getElementById("robotneutral").width,
+    height: document.getElementById("robotneutral").height
+  };
+  vortex = {
+    width: document.getElementById("vortex").width,
+    height: document.getElementById("vortex").height,
+    goalheight: 150
+  };
+
+  vortex.goalwidth = document.getElementById("bowl").width;
+  vortex.minx = (canvas.width - vortex.width) / 2;
+  vortex.maxx = (canvas.width + vortex.width) / 2;
+  vortex.maxgoalx = (canvas.width - vortex.width) / 2 + vortex.goalwidth;
+  vortex.mingoalx = (canvas.width + vortex.width) / 2 - vortex.goalwidth;
+  vortex.miny = canvas.height - vortex.height;
+  vortex.maxgoaly = vortex.miny + vortex.goalheight;
+  vortex.bluex = (vortex.maxx + vortex.mingoalx) / 2;
+  vortex.redx = (vortex.minx + vortex.maxgoalx) / 2;
+}
+
+function reset2() {
+  ball = {
+    x: canvas.width / 2,
+    y: 0,
+    red: true,
+    end: false,
+    loaded: false,
+    launching: false,
+    vx: 0,
+    vy: 0,
+    cap: false
+  };
+  robot = {
+    x: canvas.width / 2,
+    v: 0,
+    y: canvas.height,
+    xoffset: 0,
+    width: document.getElementById("robotneutral").width,
+    height: document.getElementById("robotneutral").height
+  };
+  vortex = {
+    width: document.getElementById("vortex").width,
+    height: document.getElementById("vortex").height,
+    goalheight: 150
+  };
+
+  vortex.goalwidth = document.getElementById("bowl").width;
+  vortex.minx = (canvas.width - vortex.width) / 2;
+  vortex.maxx = (canvas.width + vortex.width) / 2;
+  vortex.maxgoalx = (canvas.width - vortex.width) / 2 + vortex.goalwidth;
+  vortex.mingoalx = (canvas.width + vortex.width) / 2 - vortex.goalwidth;
+  vortex.miny = canvas.height - vortex.height;
+  vortex.maxgoaly = vortex.miny + vortex.goalheight;
+  vortex.bluex = (vortex.maxx + vortex.mingoalx) / 2;
+  vortex.redx = (vortex.minx + vortex.maxgoalx) / 2;
+}
+
+function physics() {
+
+  robot.x += robot.v;
+
+  var offset = 0;
+
+  if (ball.end)
+    offset = document.getElementById("redcap").height / 2;
+  else
+    offset = document.getElementById("redparticle").height / 2;
+
+  var maxy = canvas.height;
+  var maxx = canvas.width;
+  maxy -= offset;
+  maxx -= offset;
+  var robotvs = 0.1;
+  var scoredist = 280;
+  var vscale = scoredist * (robot.v / 5);
+  var scoretolerance = (vortex.goalwidth / 2) - offset;
+
+  if (ball.red) {
+    targets[2] = vortex.redx - scoredist - vscale;
+    targets[3] = vortex.redx + scoredist - vscale;
+    var targetx = vortex.redx;
+  } else {
+    targets[2] = vortex.bluex - scoredist - vscale;
+    targets[3] = vortex.bluex + scoredist - vscale;
+    var targetx = vortex.bluex;
+  }
+
+  if (Math.abs(targetx - targets[2]) > minscoredist && targets[2] > offset && targets[2] < maxx) {
+    targets[0] = targets[2];
+  } else if (Math.abs(targetx - targets[3]) > minscoredist && targets[3] > offset && targets[3] < maxx) {
+    targets[0] = targets[3];
+  }
+
+  if (Math.abs(targetx - targets[3]) > minscoredist && targets[3] > offset && targets[3] < maxx) {
+    targets[1] = targets[3];
+  } else if (Math.abs(targetx - targets[2]) > minscoredist && targets[2] > offset && targets[2] < maxx) {
+    targets[1] = targets[2];
+  }
+
+  if (grave && Math.abs(robot.x - targetx) > minscoredist) {
+    if ((Math.abs(targets[0] - robot.x) < scoretolerance && Math.abs(targets[2] - robot.x) < scoretolerance) || (Math.abs(targets[1] - robot.x) < scoretolerance && Math.abs(targets[3] - robot.x) < scoretolerance)) {
+      if (!ball.launching)
+        launch = true;
+    } else {
+      launch = false;
+    }
+  }
+
+  if (timeremaining() > 0) {
+    ai = false;
+
+    if (timeremaining() < 30 && !ball.end) {
+      robot.xoffset = -200;
+      robot.x -= robot.xoffset;
+      robot.y = canvas.height;
+      ball.end = true;
+    }
+
+    if (rightarrow)
+      robot.v += robotvs;
+    else if (leftarrow)
+      robot.v -= robotvs;
+    else if (gamepadx !== 0)
+      robot.v += robotvs * gamepadx;
+    else
+      robot.v *= 0.7;
+  } else if (timeremaining() < -10) {
+    ai = true;
+    if (!ball.loaded) {
+
+      var futurepos = robot.x + robot.v / 2 * (Math.abs(robot.v) / robotvs + 1);
+
+      if (ball.x > futurepos)
+        robot.v += robotvs;
+      else if (ball.x < futurepos)
+        robot.v -= robotvs;
+
+    } else {
+
+      if ((Math.abs(targets[0] - robot.x) < scoretolerance && Math.abs(targets[2] - robot.x) < scoretolerance && Math.abs(robot.x - targetx) > minscoredist) || (Math.abs(targets[1] - robot.x) < scoretolerance && Math.abs(targets[3] - robot.x) < scoretolerance && Math.abs(robot.x - targetx) > minscoredist)) {
+        if (!ball.launching) {
+          launch = true;
+        }
+      } else if (Math.abs(targets[0] - robot.x) < Math.abs(targets[1] - robot.x)) {
+
+        if (robot.x > targets[0] + scoretolerance) {
+          robot.v -= robotvs;
+        } else if (robot.x < targets[0] - scoretolerance) {
+          robot.v += robotvs;
+        } else if (robot.x > targets[0]) {
+          robot.v -= robotvs;
+        } else if (robot.x < targets[0]) {
+          robot.v += robotvs;
+        }
+
+      } else {
+
+        if (robot.x > targets[1] + scoretolerance) {
+          robot.v -= robotvs;
+        } else if (robot.x < targets[1] - scoretolerance) {
+          robot.v += robotvs;
+        } else if (robot.x > targets[1]) {
+          robot.v -= robotvs;
+        } else if (robot.x < targets[1]) {
+          robot.v += robotvs;
+        }
+      }
+
+    }
+  } else if (timeremaining() > -5) {
+    robot.xoffset = 0;
+    robot.x = canvas.width / 2;
+    ball.launching = true;
+  } else {
+    ball.launching = false;
+    ball.end = false;
+    ball.cap = false;
+  }
+
+  if (robot.x > canvas.width && robot.v > 0)
+    robot.v *= -0.5;
+  else if (robot.x < 0 && robot.v < 0)
+    robot.v *= -0.5;
+
+  ball.y = ball.y + ball.vy;
+  ball.x = ball.x + ball.vx;
+
+  if (ball.y > maxy && ball.vy > 0)
+    ball.vy *= -0.3;
+  else
+    ball.vy += 0.3;
+
+  if (ball.x < offset && ball.vx < 0)
+    ball.vx *= -0.8;
+
+  if (ball.x > maxx && ball.vx > 0)
+    ball.vx *= -0.8;
+
+  ball.vy *= 0.99;
+  ball.vx *= 0.99;
+
+  if (ball.cap) {
+    ball.vy = 0;
+    ball.vx = 0;
+    ball.y = vortex.miny - 50;
+    ball.x = targetx;
+  }
+
+  if (ball.launching) {
+    launch = false;
+    if (ball.y > canvas.height - offset * 2)
+      ball.launching = false;
+  } else {
+    if (ball.loaded && !ball.end) {
+      ball.x = robot.x;
+      ball.y = canvas.height - robot.height * 0.63;
+      ball.vy = 0;
+      ball.vx = 0;
+      if (launch) {
+        ball.vy = -18;
+        launch = false;
+        ball.loaded = false;
+        ball.launching = true;
+        if (ball.red) {
+          if (robot.x > vortex.redx)
+            ball.vx = -5 + robot.v;
+          else
+            ball.vx = 5 + robot.v;
+        } else {
+          if (robot.x > vortex.bluex)
+            ball.vx = -5 + robot.v;
+          else
+            ball.vx = 5 + robot.v;
+        }
+      }
+    }
+
+    if (Math.abs(ball.x - robot.x) < robot.width / 2 && ((!ball.end && ball.y > canvas.height - robot.height && ball.y > canvas.height - offset * 3 && ball.vy < 0 && ball.vy > -1) || (ball.end && ball.y + 0.8 * offset < robot.y && ball.y + 2 * offset > robot.y))) {
+      if (ball.end) {
+
+        if (launch) {
+          launch = false;
+          ball.launching = true;
+        }
+
+        robot.y = Math.max(robot.y - 0.8, vortex.miny);
+        ball.vy = 0;
+        ball.y = robot.y - offset;
+
+        if (ball.x < robot.x)
+          ball.vx += 0.0005 * Math.abs(robot.y - ball.y);
+        else
+          ball.vx -= 0.0005 * Math.abs(robot.y - ball.y);
+
+      } else if (ball.y < canvas.height - offset * 2) {
+        ball.loaded = true;
+      } else {
+        ball.vy = -1;
+      }
+    } else {
+      robot.y = Math.min(canvas.height - 10, robot.y + 1);
+    }
+  }
+
+  if (ball.red || ball.end) {
+
+    if (ball.x < vortex.maxgoalx && ball.x > vortex.minx) {
+      if (ball.y < vortex.maxgoaly && ball.y + offset > vortex.maxgoaly && ball.vy > 0 && ball.red) {
+        if (ball.red && timeremaining() > 0 && !ball.cap) {
+          if (ball.end)
+            score += 40;
+          else
+            score += 5;
+        }
+        if (!ball.end) {
+          ball.vy = 10 * -Math.random();
+          ball.vx *= 5 - 10 * Math.random();
+          ball.red = false;
+        } else {
+          ball.cap = true;
+        }
+      } else if (ball.y > vortex.maxgoaly && ball.y - offset < vortex.maxgoaly && ball.vy < 0) {
+        ball.vy *= -0.8;
+        //if (ai) minscoredist++;
+      }
+    }
+
+    if (ball.y < vortex.maxgoaly && ball.y > vortex.miny) {
+      if (ball.x + offset > vortex.minx && ball.x < vortex.minx && ball.vx > 0) {
+        ball.vx *= -0.8;
+      } else if (ball.x - offset < vortex.minx && ball.x > vortex.minx && ball.vx < 0) {
+        ball.vx *= -0.8;
+        //if (ai) minscoredist++;
+      } else if (ball.x + offset > vortex.maxgoalx && ball.x < vortex.maxgoalx && ball.vx > 0) {
+        ball.vx *= -0.8;
+      } else if (ball.x - offset < vortex.maxgoalx && ball.x > vortex.maxgoalx && ball.vx < 0) {
+        ball.vx *= -0.8;
+      }
+    }
+  }
+
+  if (ball.end || !ball.red) {
+
+    if (ball.x < vortex.maxx && ball.x > vortex.mingoalx) {
+      if (ball.y < vortex.maxgoaly && ball.y + offset > vortex.maxgoaly && ball.vy > 0 && !ball.red) {
+        if (!ball.red && timeremaining() > 0 && !ball.cap) {
+          if (ball.end)
+            score += 40;
+          else
+            score += 5;
+        }
+        if (!ball.end) {
+          ball.vy = 10 * -Math.random();
+          ball.vx *= 5 - 10 * Math.random();
+          ball.red = true;
+        } else {
+          ball.cap = true;
+        }
+      } else if (ball.y > vortex.maxgoaly && ball.y - offset < vortex.maxgoaly && ball.vy < 0) {
+        ball.vy *= -0.8;
+        //if (ai) minscoredist++;
+      }
+    }
+
+    if (ball.y < vortex.maxgoaly && ball.y > vortex.miny) {
+      if (ball.x + offset > vortex.maxx && ball.x < vortex.maxx && ball.vx > 0) {
+        ball.vx *= -0.8;
+      } else if (ball.x - offset < vortex.maxx && ball.x > vortex.maxx && ball.vx < 0) {
+        ball.vx *= -0.8;
+        //if (ai) minscoredist++;
+      } else if (ball.x + offset > vortex.mingoalx && ball.x < vortex.mingoalx && ball.vx > 0) {
+        ball.vx *= -0.8;
+      } else if (ball.x - offset < vortex.mingoalx && ball.x > vortex.mingoalx && ball.vx < 0) {
+        ball.vx *= -0.8;
+      }
+    }
+  }
+
+  ball.y = Math.min(maxy, ball.y);
+  ball.x = Math.max(offset, Math.min(maxx, ball.x));
+
+};
+
+var physicsint = setInterval(physics, 10);
+
+var roboty = canvas.height - document.getElementById("robotneutral").height;
+
+function draw() {
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (grave) {
+    ctx.beginPath();
+    ctx.moveTo(targets[0], canvas.height);
+    ctx.lineTo(targets[0], ball.y);
+    ctx.lineTo(targets[1], ball.y);
+    ctx.lineTo(targets[1], canvas.height);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(targets[2], canvas.height);
+    ctx.lineTo(targets[2], vortex.maxgoaly);
+    ctx.lineTo(targets[3], vortex.maxgoaly);
+    ctx.lineTo(targets[3], canvas.height);
+    ctx.stroke();
+  }
+
+  ctx.font = "48px verdana";
+  ctx.fillStyle = "#000000";
+
+  ctx.fillText("Score: " + score, 10, 100);
+  ctx.fillText("Highcore: " + highscore, 10, 150);
+
+  ctx.fillStyle = "#00ff00";
+
+  if (timeremaining() > 0)
+    ctx.fillText("Time remaining: " + timeremaining(), 10, 50);
+  else
+    ctx.fillText("Press Enter or Press A on Gamepad or Touch Screen to begin", 10, 50);
+
+  ctx.fillStyle = "#ff2222";
+
+  if (timeremaining() > 30 && timeremaining() < 35)
+    ctx.fillText("End game in " + (timeremaining() - 30), 10, 200);
+  else if (timeremaining() < 0 && timeremaining() > -10)
+    ctx.fillText("Game Over", 10, 200);
+
+
+  ctx.drawImage(document.getElementById("vortex"), (canvas.width - document.getElementById("vortex").width) / 2, canvas.height - document.getElementById("vortex").height);
+
+  if (ball.end) {
+    ctx.fillStyle = "#bfbfbf";
+    ctx.fillRect(robot.x + robot.xoffset + robot.width / 2, robot.y, robot.width, 10);
+    if (ball.red)
+      ctx.drawImage(document.getElementById("redcap"), ball.x - document.getElementById("redcap").width / 2, ball.y - document.getElementById("redcap").height / 2);
+    else
+      ctx.drawImage(document.getElementById("bluecap"), ball.x - document.getElementById("bluecap").width / 2, ball.y - document.getElementById("bluecap").height / 2);
+  } else {
+    if (ball.red)
+      ctx.drawImage(document.getElementById("redparticle"), ball.x - document.getElementById("redparticle").width / 2, ball.y - document.getElementById("redparticle").height / 2);
+    else
+      ctx.drawImage(document.getElementById("blueparticle"), ball.x - document.getElementById("blueparticle").width / 2, ball.y - document.getElementById("blueparticle").height / 2);
+  }
+
+  ctx.drawImage(document.getElementById("bowl"), (canvas.width - document.getElementById("vortex").width) / 2, canvas.height - document.getElementById("vortex").height + 150);
+
+  ctx.drawImage(document.getElementById("bowl"), (canvas.width - document.getElementById("vortex").width) / 2 + document.getElementById("vortex").width - document.getElementById("bowl").width, canvas.height - document.getElementById("vortex").height + 150);
+
+  if ((robot.x - robot.x % 13) % 3 === 2)
+    ctx.drawImage(document.getElementById("robotleft"), robot.xoffset + robot.x - document.getElementById("robotleft").width / 2, canvas.height - document.getElementById("robotleft").height);
+  if ((robot.x - robot.x % 13) % 3 === 1)
+    ctx.drawImage(document.getElementById("robotneutral"), robot.xoffset + robot.x - document.getElementById("robotneutral").width / 2, canvas.height - document.getElementById("robotneutral").height);
+  if ((robot.x - robot.x % 13) % 3 === 0)
+    ctx.drawImage(document.getElementById("robotright"), robot.xoffset + robot.x - document.getElementById("robotright").width / 2, canvas.height - document.getElementById("robotright").height);
+
+  requestAnimationFrame(draw);
+}
+
+draw();
+
+document.onkeydown = checkKey;
+
+function checkKey(e) {
+  e = e || window.event;
+  switch (e.keyCode) {
+    case 37:
+      if (!leftarrow)
+        leftarrow = true;
+      break;
+    case 39:
+      if (!rightarrow)
+        rightarrow = true;
+      break;
+    case 32:
+      launch = true;
+      break;
+    case 13:
+      reset();
+      break;
+    case 192:
+      grave = true;
+      break;
+  }
+}
+
+document.onkeyup = checkKeyup;
+var scale = Math.pow(2, 10);
+
+function checkKeyup(e) {
+  e = e || window.event;
+  switch (e.keyCode) {
+    case 37:
+      leftarrow = false;
+      break;
+    case 39:
+      rightarrow = false;
+      break;
+    case 192:
+      grave = false;
+      break;
+    case 219:
+      canvas.width = canvas.width << 1;
+      scale = scale >> 1;
+      ctx.scale(scale / Math.pow(2, 10), 1);
+      reset2();
+      break;
+    case 221:
+      canvas.width = canvas.width >> 1;
+      scale = scale << 1;
+      ctx.scale(scale / Math.pow(2, 10), 1);
+      reset2();
+      break;
+  }
+}
+
+canvas.addEventListener('touchstart', function(event) {
+  if (event.targetTouches.length == 1) {
+    var touch = event.targetTouches[0];
+
+    if (timeremaining() < 0) {
+      reset();
+    } else if (touch.clientX < canvas.clientWidth / 3)
+      leftarrow = true;
+    else if (touch.clientX < 2 * canvas.clientWidth / 3) {
+      launch = true;
+    } else
+      rightarrow = true;
+
+  }
+}, false);
+
+canvas.addEventListener('touchend', function(event) {
+  leftarrow = false;
+  rightarrow = false;
+}, false);
+
+</script>
+</body>
+</html>
