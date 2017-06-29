@@ -1,0 +1,602 @@
+<html>
+<head>
+<title>
+Life 3d
+</title>
+<style>
+#griddy {
+  perspective: 1000px;
+}
+
+</style>
+</head>
+<body>
+
+<script>
+var boardx = 100;
+var boardy = 100;
+var boardz = 100;
+
+var board = [];
+var boardb = [];
+var boardc;
+var gridsave = [];
+var newgrid;
+
+var resiseTimeout;
+var gridx = 0;
+var gridy = 0;
+var gridz = 0;
+
+var pixelscale = 80;
+
+var animation = false;
+var interval;
+
+var pointx = 0;
+var pointy = 0;
+var pointz = 0;
+
+document.body.style.overflow = 'hidden';
+
+var buttonholder = document.createElement("div");
+document.body.appendChild(buttonholder);
+
+function createButton(click) {
+  var mbutton = document.createElement("button");
+  var text = document.createTextNode(click);
+  mbutton.appendChild(text);
+  mbutton.addEventListener('click', function(event) {
+    eval(click);
+  });
+  buttonholder.appendChild(mbutton);
+}
+
+function createButton(click, title) {
+  var mbutton = document.createElement("button");
+  var text = document.createTextNode(click);
+  mbutton.appendChild(text);
+  mbutton.addEventListener('click', function(event) {
+    eval(click);
+  });
+  mbutton.title = title;
+  buttonholder.appendChild(mbutton);
+}
+
+try {
+  createButton("reset()", "(r): clear board and stop animations");
+  createButton("read()", "(f): check for any user clicked checkboxes and add to internal board; use arrows, q, w, and space to navigate or the mouse");
+  createButton("randomizeboard()", "(d): checks a random 10% of the board");
+  createButton("glider()", "adds Gosper's Glider Gun at the current z pointer location; won't be complete unless if rendered at 42x21 boxes or 3360x1702 pixels");
+  createButton("next()", "(e): renders an iteration of life");
+  createButton("interval=setInterval(next, 1000)", "runs another iteration every 1000ms");
+  createButton("interval=setInterval(next, 100)", "runs another iteration every 100ms");
+  createButton("interval=setInterval(next, 1)", "runs another iteration every 1ms");
+  createButton("clearInterval(interval)", "stops the interval");
+  createButton("startanim()", "(a): starts running iterations at the refresh rate of the display");
+  createButton("stopanim()", "(s): stops the startanim function");
+} catch (err) {
+  log(err);
+}
+
+var meter = document.createElement("button");
+buttonholder.appendChild(meter);
+meter.innerHTML = '1000000 IPS';
+var fps = 0;
+var lastCalledTime = Date.now();
+var previousfps = 0;
+var counts = 0;
+
+setInterval(updatemeter, 1000);
+
+function updatemeter() {
+  delta = (Date.now() - lastCalledTime) / 1000;
+  lastCalledTime = Date.now();
+  fps = Math.floor(counts / delta);
+  if (fps != previousfps) {
+    meter.innerHTML = fps + ' IPS';
+    previousfps = fps;
+  }
+  counts = 0;
+}
+
+function fpsframe() {
+  counts++;
+}
+
+var meterb = document.createElement("button");
+buttonholder.appendChild(meterb);
+meterb.innerHTML = '1000000 CPS';
+var fpsb = 0;
+var lastCalledTimeb = Date.now();
+var previousfpsb = 0;
+var countsb = 0;
+
+setInterval(updatemeterb, 1000);
+
+function updatemeterb() {
+  deltab = (Date.now() - lastCalledTimeb) / 1000;
+  lastCalledTimeb = Date.now();
+  fpsb = Math.floor(countsb / deltab);
+  if (fpsb != previousfpsb) {
+    meterb.innerHTML = fpsb + ' CPS';
+  }
+  countsb = 0;
+}
+
+function fpsframeb() {
+  countsb++;
+}
+
+var logbutton = document.createElement("button");
+buttonholder.appendChild(logbutton);
+logbutton.innerHTML = 'log display';
+
+var grid = document.createElement("div");
+grid.style.position = 'relative';
+grid.id = "griddy";
+document.body.appendChild(grid);
+
+onresize();
+
+window.addEventListener("resize", onresize);
+
+function onresize() {
+  clearTimeout(resiseTimeout);
+  resiseTimeout = setTimeout(resizeboards);
+}
+
+function resizeboards() {
+  boardx = Math.floor((window.innerWidth) / pixelscale);
+  boardy = Math.floor((window.innerHeight - buttonholder.offsetHeight) / pixelscale);
+
+  if (boardx < 1) {
+    boardx = 1;
+  }
+
+  if (boardy < 1) {
+    boardy = 1;
+  }
+
+  boardz = boardx;
+
+  try {
+    if (board !== undefined && boardb !== undefined && gridsave !== undefined) {
+      while (board.length != boardx && boardb.length != boardx && gridsave.length != boardx) {
+        if (board.length > boardx) {
+          board.pop();
+        }
+        if (board.length < boardx) {
+          board.push([]);
+        }
+
+        if (boardb.length > boardx) {
+          boardb.pop();
+        }
+        if (boardb.length < boardx) {
+          boardb.push([]);
+        }
+
+        if (gridsave.length > boardx) {
+          gridsave.pop();
+        }
+        if (gridsave.length < boardx) {
+          gridsave.push([]);
+        }
+      }
+    }
+    for (var x = 0; x < boardx; x++) {
+      if (board[x] !== undefined && boardb[x] !== undefined && gridsave[x] !== undefined) {
+        while (board[x].length != boardy && boardb[x].length != boardy && gridsave[x].length != boardy) {
+          if (board[x].length > boardy) {
+            board.pop();
+          }
+          if (board[x].length < boardy) {
+            board[x].push([]);
+          }
+
+          if (boardb[x].length > boardy) {
+            boardb[x].pop();
+          }
+          if (boardb[x].length < boardy) {
+            boardb[x].push([]);
+          }
+
+          if (gridsave[x].length > boardy) {
+            gridsave[x].pop();
+          }
+          if (gridsave[x].length < boardy) {
+            gridsave[x].push([]);
+          }
+        }
+        for (var y = 0; y < boardy; y++) {
+          if (board[x][y] !== undefined && boardb[x][y] !== undefined && gridsave[x][y] !== undefined) {
+            while (board[x][y].length != boardz && boardb[x][y].length != boardz && gridsave[x][y].length != boardz) {
+              if (board[x][y].length > boardz) {
+                board[x][y].pop();
+              }
+              if (board[x][y].length < boardz) {
+                board[x][y].push(false);
+              }
+
+              if (boardb[x][y].length > boardz) {
+                boardb[x][y].pop();
+              }
+              if (boardb[x][y].length < boardz) {
+                boardb[x][y].push(false);
+              }
+
+              if (gridsave[x][y].length > boardz) {
+                gridsave[x][y].pop();
+              }
+              if (gridsave[x][y].length < boardz) {
+                gridsave[x][y].push(false);
+              }
+            }
+          }
+        }
+      }
+    }
+  } catch (err) {
+    log(err);
+  }
+
+  try {
+    for (var x = 0; x < Math.max(boardx, gridx); x++) {
+      for (var y = 0; y < Math.max(boardy, gridy); y++) {
+        for (var z = 0; z < Math.max(boardz, gridz); z++) {
+          if (x < boardx && y < boardy && z < boardz) {
+            if (document.getElementById("check" + x + "a" + y + "a" + z) === null) {
+              var box = document.createElement("input");
+              box.style.padding = '0px';
+              box.style.width = '10px';
+              box.style.height = '10px';
+              box.type = 'checkbox';
+              box.id = "check" + x + "a" + y + "a" + z;
+              box.style.position = 'absolute';
+              box.style.transform = "translate3D(" + x * pixelscale + "px, " + y * pixelscale + "px, " + -z * pixelscale + "px)";
+              grid.appendChild(box);
+            }
+          } else if (document.getElementById("check" + x + "a" + y + "a" + z) !== null) {
+            var element = document.getElementById("check" + x + "a" + y + "a" + z);
+            element.parentNode.removeChild(element);
+          }
+
+          if (x + 1 < boardx && y + 1 < boardy && z + 1 < boardz) {
+            if (document.getElementById("square" + x + "a" + y + "a" + z) === null) {
+              var square = document.createElement("div");
+              square.style.border = '1px solid hsl(' + ((z / boardz) * 360) + ', 100%, 70%)';
+              square.style.padding = '0px';
+              square.style.position = 'absolute';
+              square.style.zIndex = '-1';
+              square.style.width = (pixelscale - 0) + 'px';
+              square.style.height = (pixelscale - 0) + 'px';
+              square.style.transform = "translate3D(" + (5 + x * pixelscale) + "px, " + (5 + y * pixelscale) + "px, " + (-0 + -z * pixelscale) + "px)";
+              square.id = "square" + x + "a" + y + "a" + z;
+              grid.appendChild(square);
+            }
+          } else if (document.getElementById("square" + x + "a" + y + "a" + z) !== null) {
+            var squareelement = document.getElementById("square" + x + "a" + y + "a" + z);
+            squareelement.parentNode.removeChild(squareelement);
+          }
+        }
+      }
+    }
+    gridx = boardx;
+    gridy = boardy;
+    gridz = boardz;
+  } catch (err) {
+    log(err);
+  }
+}
+
+function glider() {
+  board[1][5][pointz] = true;
+  board[1][6][pointz] = true;
+  board[2][5][pointz] = true;
+  board[2][6][pointz] = true;
+  board[11][5][pointz] = true;
+  board[11][6][pointz] = true;
+  board[11][7][pointz] = true;
+  board[12][4][pointz] = true;
+  board[12][8][pointz] = true;
+  board[13][3][pointz] = true;
+  board[13][9][pointz] = true;
+  board[14][3][pointz] = true;
+  board[14][9][pointz] = true;
+  board[15][6][pointz] = true;
+  board[16][4][pointz] = true;
+  board[16][8][pointz] = true;
+  board[17][5][pointz] = true;
+  board[17][6][pointz] = true;
+  board[17][7][pointz] = true;
+  board[18][6][pointz] = true;
+  board[21][3][pointz] = true;
+  board[21][4][pointz] = true;
+  board[21][5][pointz] = true;
+  board[22][3][pointz] = true;
+  board[22][4][pointz] = true;
+  board[22][5][pointz] = true;
+  board[23][2][pointz] = true;
+  board[23][6][pointz] = true;
+  board[25][1][pointz] = true;
+  board[25][2][pointz] = true;
+  board[25][6][pointz] = true;
+  board[25][7][pointz] = true;
+  board[35][3][pointz] = true;
+  board[35][4][pointz] = true;
+  board[36][3][pointz] = true;
+  board[36][4][pointz] = true;
+  board[35][22][pointz] = true;
+  board[35][23][pointz] = true;
+  board[35][25][pointz] = true;
+  board[36][22][pointz] = true;
+  board[36][23][pointz] = true;
+  board[36][25][pointz] = true;
+  board[36][26][pointz] = true;
+  board[36][27][pointz] = true;
+  board[37][28][pointz] = true;
+  board[38][22][pointz] = true;
+  board[38][23][pointz] = true;
+  board[38][25][pointz] = true;
+  board[38][26][pointz] = true;
+  board[38][27][pointz] = true;
+  board[39][23][pointz] = true;
+  board[39][25][pointz] = true;
+  board[40][23][pointz] = true;
+  board[40][25][pointz] = true;
+  board[41][24][pointz] = true;
+  draw();
+}
+
+function log(data) {
+  console.log(data);
+  logbutton.innerHTML = data;
+}
+
+function reset() {
+  for (var x = 0; x < boardx; x++) {
+    for (var y = 0; y < boardy; y++) {
+      for (var z = 0; z < boardz; z++) {
+        board[x][y][z] = false;
+      }
+    }
+  }
+  stopanim();
+  clearInterval(interval);
+  draw();
+}
+
+function aclip(a, b) {
+  try {
+    if (a[b] !== undefined)
+      return a[b];
+    else
+      return false;
+  } catch (err) {
+    log(err);
+  }
+} /*check if index exists, if not return equivalent of 0*/
+
+function clip(a, b, c, d) {
+  try {
+    return aclip(aclip(aclip(a, b), c), d);
+  } catch (err) {
+    log(err);
+  }
+} /*check if index exists, if not return int*/
+
+function countNeighbors(x, y, z) {
+  return (
+    clip(board, x - 1, y - 1, z - 1) +
+    clip(board, x - 1, y - 1, z + 0) +
+    clip(board, x - 1, y - 1, z + 1) +
+    clip(board, x - 1, y + 0, z - 1) +
+    clip(board, x - 1, y + 0, z + 0) +
+    clip(board, x - 1, y + 0, z + 1) +
+    clip(board, x - 1, y + 1, z - 1) +
+    clip(board, x - 1, y + 1, z + 0) +
+    clip(board, x - 1, y + 1, z + 1) +
+
+    clip(board, x + 0, y - 1, z - 1) +
+    clip(board, x + 0, y - 1, z + 0) +
+    clip(board, x + 0, y - 1, z + 1) +
+    clip(board, x + 0, y + 0, z - 1) +
+
+    clip(board, x + 0, y + 0, z + 1) +
+    clip(board, x + 0, y + 1, z - 1) +
+    clip(board, x + 0, y + 1, z + 0) +
+    clip(board, x + 0, y + 1, z + 1) +
+
+    clip(board, x + 1, y - 1, z - 1) +
+    clip(board, x + 1, y - 1, z + 0) +
+    clip(board, x + 1, y - 1, z + 1) +
+    clip(board, x + 1, y + 0, z - 1) +
+    clip(board, x + 1, y + 0, z + 0) +
+    clip(board, x + 1, y + 0, z + 1) +
+    clip(board, x + 1, y + 1, z - 1) +
+    clip(board, x + 1, y + 1, z + 0) +
+    clip(board, x + 1, y + 1, z + 1));
+}
+
+function next() {
+  for (var x = 0; x < boardx; x++) {
+    for (var y = 0; y < boardy; y++) {
+      for (var z = 0; z < boardz; z++) {
+        try {
+          switch (countNeighbors(x, y, z)) {
+            case 2:
+              boardb[x][y][z] = board[x][y][z];
+              break;
+            case 3:
+              boardb[x][y][z] = true;
+              check(x, y, z, true);
+              break;
+            default:
+              boardb[x][y][z] = false;
+              check(x, y, z, false);
+              break;
+          }
+        } catch (err) {
+          log(err);
+        }
+      }
+    }
+  }
+  fpsframe();
+  boardc = board;
+  board = boardb;
+  boardb = boardc;
+}
+
+function anim() {
+  next();
+  if (animation)
+    requestAnimationFrame(anim);
+}
+
+function startanim() {
+  animation = true;
+  requestAnimationFrame(anim);
+}
+
+function stopanim() {
+  animation = false;
+}
+
+function draw() {
+  updatemeterb();
+  newgrid = board;
+  for (var x = 0; x < boardx; x++) {
+    for (var y = 0; y < boardy; y++) {
+      for (var z = 0; z < boardz; z++) {
+        check(x, y, z, newgrid[x][y][z]);
+      }
+    }
+  }
+  updatemeterb();
+}
+
+function read() {
+  for (var x = 0; x < boardx; x++) {
+    for (var y = 0; y < boardy; y++) {
+      for (var z = 0; z < boardz; z++) {
+        board[x][y][z] = document.getElementById("check" + x + "a" + y + "a" + z).checked;
+        gridsave[x][y][z] = document.getElementById("check" + x + "a" + y + "a" + z).checked;
+      }
+    }
+  }
+}
+
+function randomizeboard() {
+  for (var i = 0; i < boardx * boardy * boardz * 0.1; i++) {
+    var x = Math.floor(Math.random() * board.length);
+    var y = Math.floor(Math.random() * board[x].length);
+    var z = Math.floor(Math.random() * board[x][y].length);
+    board[x][y][z] = true;
+  }
+  draw();
+}
+
+function check(x, y, z, val) {
+  try {
+    if (gridsave[x][y][z] != val) {
+      gridsave[x][y][z] = val;
+      document.getElementById("check" + x + "a" + y + "a" + z).checked = val;
+      fpsframeb();
+    }
+  } catch (err) {
+    log(err);
+  }
+}
+
+function checkpoints() {
+
+  if (pointx < 0)
+    pointx = 0;
+
+  if (pointx >= boardx)
+    pointx = boardx - 1;
+
+  if (pointy < 0)
+    pointy = 0;
+
+  if (pointy >= boardy)
+    pointy = boardy - 1;
+
+  if (pointz < 0)
+    pointz = 0;
+
+  if (pointz >= boardz)
+    pointz = boardz - 1;
+
+}
+
+document.onkeydown = function(e) {
+  switch (e.keyCode) {
+    case 37:
+      /*alert('left');*/
+      pointx--;
+      checkpoints();
+      document.getElementById("check" + pointx + "a" + pointy + "a" + pointz).focus();
+      break;
+    case 38:
+      /*alert('up');*/
+      pointy--;
+      checkpoints();
+      document.getElementById("check" + pointx + "a" + pointy + "a" + pointz).focus();
+      break;
+    case 39:
+      /*alert('right');*/
+      pointx++;
+      checkpoints();
+      document.getElementById("check" + pointx + "a" + pointy + "a" + pointz).focus();
+      break;
+    case 40:
+      /*alert('down');*/
+      pointy++;
+      checkpoints();
+      document.getElementById("check" + pointx + "a" + pointy + "a" + pointz).focus();
+      break;
+    case 81:
+      /*alert('q');*/
+      pointz--;
+      checkpoints();
+      document.getElementById("check" + pointx + "a" + pointy + "a" + pointz).focus();
+      break;
+    case 87:
+      /*alert('w');*/
+      pointz++;
+      checkpoints();
+      document.getElementById("check" + pointx + "a" + pointy + "a" + pointz).focus();
+      break;
+    case 69:
+      /*alert('e');*/
+      next();
+      break;
+    case 70:
+      /*alert('f');*/
+      read();
+      break;
+    case 68:
+      /*alert('d');*/
+      randomizeboard();
+      break;
+    case 82:
+      /*alert('r');*/
+      reset();
+      break;
+    case 65:
+      /*alert('a');*/
+      startanim();
+      break;
+    case 83:
+      /*alert('s');*/
+      stopanim();
+      break;
+  }
+};
+
+</script>
+</body>
+</html>

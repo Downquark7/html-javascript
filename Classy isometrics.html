@@ -1,0 +1,358 @@
+<html>
+<head>
+<title>
+Classy Isometrics
+</title>
+<style>
+
+</style>
+</head>
+<body>
+<canvas id='canvas' style='border: 1px solid blue; padding: 0px; top: 0px; left: 0px; position: absolute;'></canvas>
+
+<script>
+window.onerror = function(e, url, line) {
+  var ertext = document.createElement('div');
+  var text = document.createTextNode('onerror: ' + e + ' URL:' + url + ' Line:' + (line - 44));
+  ertext.appendChild(text);
+  document.body.appendChild(ertext);
+  console.error('\nLine ' + (line - 44) + ':');
+  return true;
+}
+
+function log(ntext) {
+  var ertext = document.createElement('div');
+  var text = document.createTextNode(ntext);
+  ertext.appendChild(text);
+  document.body.appendChild(ertext);
+}
+
+var canvas = document.getElementById('canvas');
+canvas.width = window.innerWidth - 3;
+canvas.height = window.innerHeight - 3;
+var ctx = canvas.getContext('2d');
+
+var ptr = {
+  x: 0,
+  y: 0,
+  oldx: 0,
+  oldy: 0,
+  color: 0,
+  l: 50
+};
+
+class triangle {
+
+  setcolor(h, s, l) {
+    this.h = h;
+    this.s = s;
+    this.l = l;
+  }
+
+  sethue(h) {
+    this.h = h;
+    this.s = 50;
+  }
+
+  resetcolor() {
+    this.setcolor(0, 0, 50);
+  }
+
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.resetcolor();
+
+    if (x % 2 === y % 2)
+      this.flipa = 1;
+    else
+      this.flipa = 0;
+
+    this.flipb = 1 - this.flipa;
+  }
+
+  get color() {
+    if (ptr.x === this.x && ptr.y === this.y) {
+      if (ptr.l > 0)
+        this.l = ptr.l;
+
+      if (ptr.color < 0)
+        this.resetcolor();
+      else if (ptr.color > 0)
+        this.sethue((ptr.color - 1) * 45);
+
+      return 'hsl(' + this.h + ', ' + this.s + '%, ' + (this.l * 0.9) + '%)';
+
+    } else
+      return 'hsl(' + this.h + ', ' + this.s + '%, ' + this.l + '%)';
+  }
+
+  draw(dim) {
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.moveTo(dim.x * this.x + dim.x * this.flipa, dim.y * this.y - dim.y);
+    ctx.lineTo(dim.x * this.x + dim.x * this.flipb, dim.y * this.y);
+    ctx.lineTo(dim.x * this.x + dim.x * this.flipa, dim.y * this.y + dim.y);
+    ctx.closePath();
+    ctx.fill();
+    if (this.s === 0)
+      ctx.stroke();
+  }
+
+}
+
+class boardgen {
+  constructor(yinc) {
+
+    this.yinc = yinc;
+    this.xinc = this.yinc * Math.sqrt(3);
+
+    this.x = Math.ceil(canvas.width / this.xinc);
+    this.y = Math.ceil(canvas.height / this.yinc);
+
+    this.xinc = canvas.width / this.x;
+    this.yinc = canvas.height / this.y;
+
+    this.y += 1;
+
+    this.tridraw = {
+      x: this.xinc,
+      y: this.yinc
+    };
+
+    this.grid = [];
+
+    for (var ix = 0; ix < this.x; ix++)
+      for (var iy = 0; iy < this.y; iy++)
+        this.grid.push(new triangle(ix, iy));
+  }
+
+  getindex(x, y) {
+    return (y + x * this.y);
+  }
+
+  getl(x, y) {
+    return this.grid[this.getindex(x, y)].l;
+  }
+
+  drawgrid() {
+    for (var i = 0; i < this.grid.length; i++)
+      this.grid[i].draw(this.tridraw);
+  }
+
+  drawcell(x, y) {
+    this.grid[this.getindex(x, y)].draw(this.tridraw);
+  }
+}
+
+var board = new boardgen(16);
+
+board.drawgrid();
+
+function coolpaternfunction() {
+  for (ptr.x = 0; ptr.x < board.x; ptr.x++)
+    for (ptr.y = 0; ptr.y < board.y; ptr.y++) {
+
+      ptr.color = 0;
+      ptr.l = 1;
+
+      switch (ptr.x % 16) {
+        case 4: //right 1 column
+          ptr.l = 45;
+          ptr.color = 1;
+          break;
+        case 12: //right 2 column
+          ptr.l = 45;
+          ptr.color = 1;
+          break;
+        case 3: //left 1 column
+          ptr.l = 40;
+          ptr.color = 1;
+          break;
+        case 11: //left 2 column
+          ptr.l = 40;
+          ptr.color = 1;
+          break;
+      }
+
+      if ((ptr.y + 14) % 16 === (ptr.x) % 16) { //bottom left se diagonal
+        ptr.l = 40;
+        ptr.color = 1;
+      }
+
+      if ((ptr.y) % 16 === 17 - (ptr.x) % 16) { //bottom right ne diagonal
+        ptr.l = 45;
+        ptr.color = 1;
+      }
+
+      if ((ptr.y + 15) % 16 === (ptr.x) % 16) { //bottom right se diagonal
+        ptr.l = 40;
+        ptr.color = 1;
+      }
+
+      if ((ptr.y) % 16 === 16 - (ptr.x) % 16) { //bottom left ne diagonal
+        ptr.l = 45;
+        ptr.color = 1;
+      }
+
+      if ((ptr.y + 1) % 16 === (ptr.x) % 16) { //top right se diagonal
+        ptr.l = 50;
+        ptr.color = 1;
+        switch (ptr.x % 16) {
+          case 4: //right 1 column
+            ptr.l = 45;
+            ptr.color = 1;
+            break;
+          case 12: //right 2 column
+            ptr.l = 45;
+            ptr.color = 1;
+            break;
+        }
+        switch (ptr.x % 16) { //left side of columns
+          case 3: //left 1 column
+            ptr.l = 40;
+            ptr.color = 1;
+            break;
+          case 11: //left 2 column
+            ptr.l = 40;
+            ptr.color = 1;
+            break;
+        }
+      }
+
+      if ((ptr.y) % 16 === 14 - (ptr.x) % 16) { //top left ne diagonal
+        ptr.l = 50;
+        ptr.color = 1;
+        switch (ptr.x % 16) { //left side of columns
+          case 3: //left 1 column
+            ptr.l = 40;
+            ptr.color = 1;
+            break;
+          case 11: //left 2 column
+            ptr.l = 40;
+            ptr.color = 1;
+            break;
+        }
+        switch (ptr.x % 16) {
+          case 4: //right 1 column
+            ptr.l = 45;
+            ptr.color = 1;
+            break;
+          case 12: //right 2 column
+            ptr.l = 45;
+            ptr.color = 1;
+            break;
+        }
+      }
+
+      if ((ptr.y) % 16 === 15 - (ptr.x) % 16) { //top right ne diagonal
+        ptr.l = 50;
+        ptr.color = 1;
+        switch (ptr.x % 16) {
+          case 4: //right 1 column
+            ptr.l = 45;
+            ptr.color = 1;
+            break;
+          case 12: //right 2 column
+            ptr.l = 45;
+            ptr.color = 1;
+            break;
+        }
+      }
+
+      if ((ptr.y) % 16 === (ptr.x) % 16) { //top left se diagonal
+        ptr.l = 50;
+        ptr.color = 1;
+        switch (ptr.x % 16) { //left side of columns
+          case 3: //left 1 column
+            ptr.l = 40;
+            ptr.color = 1;
+            break;
+          case 11: //left 2 column
+            ptr.l = 40;
+            ptr.color = 1;
+            break;
+        }
+      }
+
+      board.drawcell(ptr.x, ptr.y);
+      board.drawcell(ptr.oldx, ptr.oldy);
+      ptr.oldx = ptr.x;
+      ptr.oldy = ptr.y;
+    }
+}
+
+function coolpaternfunction2() {
+  var x = ptr.x + 1;
+  var y = ptr.y + 1;
+  var c = ptr.color;
+  var l = ptr.l;
+  for (ptr.x = 0; ptr.x < board.x; ptr.x++) {
+    for (ptr.y = 0; ptr.y < board.y; ptr.y++) {
+
+      ptr.color = 1;
+      ptr.l = board.getl(ptr.x % x, ptr.y % y);
+
+      board.drawcell(ptr.x, ptr.y);
+      board.drawcell(ptr.oldx, ptr.oldy);
+      ptr.oldx = ptr.x;
+      ptr.oldy = ptr.y;
+    }
+  }
+  ptr.x = x - 1;
+  ptr.y = y - 1;
+  ptr.color = c;
+  ptr.l = l;
+}
+
+document.onkeydown = checkKey;
+
+function checkKey(e) {
+
+  e = e || window.event;
+
+  switch (e.keyCode) {
+    case 38: //up arrow
+      ptr.y = Math.max(ptr.y - 1, 0);
+      break;
+    case 40: //down arrow
+      ptr.y = Math.min(ptr.y + 1, board.y);
+      break;
+    case 37: //left arrow
+      ptr.x = Math.max(ptr.x - 1, 0);
+      break;
+    case 39: //right arrow
+      ptr.x = Math.min(ptr.x + 1, board.x);
+      break;
+    case 65:
+      ptr.l = 20;
+      break;
+    case 83:
+      ptr.l = 30;
+      break;
+    case 68:
+      ptr.l = 40;
+      break;
+    case 70:
+      ptr.l = 50;
+      break;
+    case 71:
+      ptr.l = 0;
+      break;
+    case 76:
+      coolpaternfunction2();
+      break;
+  }
+
+  if (e.keyCode > 46 && e.keyCode < 58)
+    ptr.color = e.keyCode - 49;
+
+  board.drawcell(ptr.x, ptr.y);
+  board.drawcell(ptr.oldx, ptr.oldy);
+  ptr.oldx = ptr.x;
+  ptr.oldy = ptr.y;
+}
+
+</script>
+</body>
+</html>

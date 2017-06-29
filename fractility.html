@@ -1,0 +1,307 @@
+<html>
+<head>
+<title>
+Fractility
+</title>
+<style>
+
+</style>
+</head>
+<body>
+<progress id="progress" style="width:100%"></progress>
+<style>
+  div {
+    height: 500px;
+    overflow: scroll;
+  }
+  
+  .shortInput {
+    width: 50px;
+  }
+
+</style>
+<input class="shortInput" type="number" value="1" id="canvasEnabled" title="canvasEnabled">
+<input class="shortInput" type="number" value="1" id="svgEnabled" title="svgEnabled">
+<input class="shortInput" type="number" value="4" id="depth" title="depth">
+<input class="shortInput" type="number" value="3" id="sides" title="sides">
+<input class="shortInput" type="number" value="1" id="showIncompleteOutput" title="showIncompleteOutput">
+<input class="shortInput" type="number" value="1" id="pointsVisible" title="pointsVisible">
+<input class="shortInput" type="number" value="1" id="centersEnabled" title="centersEnabled">
+<input type="text" value="rgba(255, 0, 255, 0.5)" id="centerStyle" title="centerStyle">
+<input class="shortInput" type="number" value="1" id="cornersEnabled" title="cornersEnabled">
+<input type="text" value="rgba(0, 255, 255, 0.5)" id="cornerStyle" title="cornerStyle">
+<input class="shortInput" type="number" value="1" id="baseEnabled" title="baseEnabled">
+<input type="text" value="rgba(127, 0, 255, 0.5)" id="baseStyle" title="baseStyle">
+<button onclick="clearcanv()">clearcanvas</button>
+<button onclick="fractility()">fractility</button>
+<span id="count"></span><span>
+<canvas id="myCanvas" width="4096" height="4096" style="border: 1px solid blue; width: 100%;"></canvas></span>
+<div id="svgholder" style="width: 100%">
+  <svg id="svg" viewBox="0 0 4096 4096" style="border: 1px solid blue;"></svg>
+</div>
+<div id="svgcode"></div>
+<div id="pointscode"></div>
+
+<script>
+var functionsToRun = [];
+var canvasEnabled = '';
+var svgEnabled = '';
+var depth = '';
+var sides = '';
+var showIncompleteOutput = '';
+var centersEnabled = '';
+var centerStyle = '';
+var cornersEnabled = '';
+var cornerStyle = '';
+var baseEnabled = '';
+var baseStyle = '';
+var pointsVisible = '';
+var svghtml = "";
+var pointscodetext = "";
+var f = 0;
+
+function fractility() {
+  try {
+    functionsToRun = [];
+    canvasEnabled = document.getElementById('canvasEnabled').value;
+    svgEnabled = document.getElementById('svgEnabled').value;
+    depth = document.getElementById('depth').value;
+    sides = document.getElementById('sides').value;
+    showIncompleteOutput = document.getElementById('showIncompleteOutput').value;
+    centersEnabled = document.getElementById('centersEnabled').value;
+    cornersEnabled = document.getElementById('cornersEnabled').value;
+    baseEnabled = document.getElementById('baseEnabled').value;
+    centerStyle = document.getElementById('centerStyle').value;
+    cornerStyle = document.getElementById('cornerStyle').value;
+    baseStyle = document.getElementById('baseStyle').value;
+    pointsVisible = document.getElementById('pointsVisible').value;
+    svghtml = "";
+    pointscodetext = "";
+    f = 0;
+    fractify(sides);
+    generateOutput();
+    var runninginterval = setInterval(runNext, 0);
+    if (showIncompleteOutput == 1)
+      var drawinginterval = setInterval(generateOutput, 10000);
+    requestAnimationFrame(moveProgressBar);
+  } catch (err) {
+    log(err);
+  }
+}
+
+function log(data) {
+  console.log(data);
+  alert(data);
+}
+
+function clearcanv() {
+  document.getElementById('myCanvas').getContext('2d').clearRect(0, 0, 4096, 4096);
+}
+
+function polygon(points, clas) {
+  var doDraw = false;
+  switch (clas) {
+    case "base":
+      if (baseEnabled == 1)
+        doDraw = true;
+      break;
+    case "corners":
+      if (cornersEnabled == 1)
+        doDraw = true;
+      break;
+    case "centers":
+      if (centersEnabled == 1)
+        doDraw = true;
+      break;
+  };
+  if (doDraw) {
+    var c = document.getElementById("myCanvas");
+    if (c.getContext && canvasEnabled == 1) {
+      c.style.display = "inline";
+      var ctx = c.getContext("2d");
+      ctx.beginPath();
+      for (var i = -1; i < points.length; i++) {
+        ctx.lineTo(points[rollover(i, points.length)].getx(), points[rollover(i, points.length)].gety());
+      }
+      switch (clas) {
+        case "base":
+          if (baseEnabled == 1)
+            ctx.fillStyle = baseStyle;
+          else
+            ctx.fillStyle = "transparent";
+          break;
+        case "corners":
+          if (cornersEnabled == 1)
+            ctx.fillStyle = cornerStyle;
+          else
+            ctx.fillStyle = "transparent";
+          break;
+        case "centers":
+          if (centersEnabled == 1)
+            ctx.fillStyle = centerStyle;
+          else
+            ctx.fillStyle = "transparent";
+          break;
+        default:
+          ctx.fillStyle = "";
+      };
+      ctx.fill();
+    } else {
+      c.style.display = "none"
+    }
+    switch (clas) {
+      case "base":
+        if (baseEnabled == 1)
+          var style = "fill: " + baseStyle + ";stroke: none;";
+        else
+          var style = "fill: none; stroke: none;";
+        break;
+      case "corners":
+        if (cornersEnabled == 1)
+          var style = "fill: " + cornerStyle + ";stroke: none;";
+        else
+          var style = "fill: none; stroke: none;";
+        break;
+      case "centers":
+        if (centersEnabled == 1)
+          var style = "fill: " + centerStyle + ";stroke: none;";
+        else
+          var style = "fill: none; stroke: none;";
+        break;
+      default:
+        var style = "";
+
+    };
+    var output = '<polygon style="' + style;
+    output += '" points="';
+    pointscodetext += "[";
+    for (var i = -1; i < points.length; i++) {
+      output += points[rollover(i, points.length)].getx() + "," + points[rollover(i, points.length)].gety() + " ";
+      pointscodetext += "[" + points[rollover(i, points.length)].getx() + " ," + points[rollover(i, points.length)].gety() + "], ";
+    }
+    pointscodetext += "], ";
+    svghtml += output + '"/>';
+  }
+}
+
+function generateOutput() {
+  if (pointsVisible == 1)
+    document.getElementById("pointscode").style.display = "inline-block";
+  else
+    document.getElementById("pointscode").style.display = "none";
+  document.getElementById("pointscode").textContent = pointscodetext;
+  if (svgEnabled == 1) {
+    document.getElementById("svgholder").style.display = "inline-block";
+    document.getElementById("svg").innerHTML = svghtml;
+  } else {
+    document.getElementById("svgholder").style.display = "none";
+  }
+  document.getElementById('svgcode').textContent = 'data:text/html,' + document.getElementById("svgholder").innerHTML;
+}
+
+function moveProgressBar() {
+  document.getElementById("progress").value = ((f - functionsToRun.length)).toString();
+  document.getElementById("progress").title = document.getElementById("progress").value + " / " + f;
+  if (functionsToRun.length > 0) {
+    requestAnimationFrame(moveProgressBar);
+  } else {
+    generateOutput();
+    clearInterval(drawinginterval);
+  }
+}
+
+function point(x, y) {
+  this.x = x;
+  this.y = y;
+  this.getx = getcordx;
+  this.gety = getcordy;
+}
+
+function getcordx() {
+  return this.x;
+}
+
+function getcordy() {
+  return this.y;
+}
+
+function rollover(input, length) {
+  if (input < 0)
+    return input + length;
+  else if (input >= length)
+    return input - length;
+  else
+    return input;
+}
+
+function fractify(totalPoints) {
+  this.ratio = 1;
+  this.level = depth;
+
+  this.points = [];
+  for (var i = ((totalPoints - 2) * 0.25) % 1; i <= totalPoints; i++) {
+    this.points.push(drawPoint(2048, i, totalPoints));
+  }
+
+  function drawPoint(r, currentPoint, totalPoints) {
+    var theta = ((Math.PI * 2) / totalPoints);
+    var angle = (theta * currentPoint);
+
+    return (new point((r + r * Math.cos(angle)), (r + r * Math.sin(angle))));
+  }
+  this.clas = "base";
+  polygon(this.points, this.clas);
+  this.c = [new subfractal(this, this.points, "corners")];
+}
+
+function fractal(parent) {
+  this.level = parent.level - 1;
+  this.parent = parent;
+  this.ratio = parent.ratio;
+  this.points = [];
+  this.clas = parent.clas;
+  for (var i = 0; i < parent.points.length; i++) {
+    this.points.push(new point(((parent.points[i].getx() * this.ratio + parent.points[rollover(i - 1, parent.points.length)].getx() * (2 - this.ratio)) / 2), ((parent.points[i].gety() * this.ratio + parent.points[rollover(i - 1, parent.points.length)].gety() * (2 - this.ratio)) / 2)));
+  }
+  functionsToRun.push([this.points, this.clas, this.level]);
+  if (this.level > 0) {
+    this.c = [];
+    if (1) {
+      for (var i = 0; i < parent.points.length; i++) {
+        this.c.push(new subfractal(this, [parent.points[i], this.points[i], this.points[rollover(i + 1, this.points.length)]], "corners"));
+      }
+    }
+    if (1) {
+      this.c.push(new subfractal(this, this.points, "centers"));
+    }
+  }
+}
+
+function subfractal(parent, points, clas) {
+  this.level = parent.level;
+  this.points = points;
+  this.parent = parent;
+  this.ratio = parent.ratio;
+  this.clas = clas;
+  return (new fractal(this));
+}
+
+function runNext() {
+  functionsToRun.sort(function(a, b) {
+    return b[2] - a[2]
+  });
+  if (functionsToRun.length > f) {
+    f = functionsToRun.length;
+    document.getElementById("progress").max = f.toString();
+  }
+  if (functionsToRun.length > 0) {
+    var params = functionsToRun.shift();
+    polygon(params[0], params[1]);
+  } else {
+    clearInterval(runninginterval);
+  }
+}
+
+</script>
+</body>
+</html>

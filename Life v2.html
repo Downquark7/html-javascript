@@ -1,0 +1,872 @@
+<html>
+<head>
+<title>
+Life v2
+</title>
+<style>
+canvas,
+html,
+#titlescreen,
+#mouseholder {
+  cursor: crosshair;
+  overflow: hidden;
+  padding: 0;
+  margin: auto;
+  display: block;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+</style>
+</head>
+<body>
+<div id="hud" style="position: absolute; pointer-events: none; z-index: 2; opacity: 0; background-color: black; color: #aa00ff; font-family: Verdana; font-size: 100px; font-size: 3.14vh; text-align: center; display: block; margin: auto; padding: 0px; border: 4px solid #aa00ff;">
+  Controls:
+  <br> Hold H: display Controls
+  <br> Hold L: display error logs
+  <br> Hold LeftShift: select multiple cells with pointer when pointer moves
+  <br> Hold LeftCtrl: draw a selected line when pointer moves
+  <br> Hold C: draw a selected circle when the pointer moves
+  <br> Ctrl+V: paste cells from clipboard at current pointer location
+  <br> move mouse pointer: move cell pointer
+  <br> Drag mouse pointer + hold mousedown: select cells and copy them to clipboard
+  <br> Arrows: move pointer
+  <br> Hold D: debug display
+  <br> 1: erase at pointer
+  <br> 2: fill cell at pointer
+  <br> 3: activate inverter. stays on if 8 is held
+  <br> 8: move pointer to random location
+  <br> Z: previous render buffer
+  <br> X: next render buffer
+  <br> N: next frame; overwrites next render buffer
+  <br> Hold F: fast forward
+  <br> Hold RightShift: pointer moves faster when using arows
+  <br> Mouse: move pointer to mouse
+  <br> R: reset to blank
+  <br> Resize window: resize board to fill window
+  <br>
+  <br>
+  <button onclick="fadeout(hud)" style="background-color: black; color: #aa00ff; font-family: Verdana; font-size: 9vh; text-align: center;">
+    Back
+  </button>
+  <br>
+  <br>
+</div>
+
+<div id="log" style="position: absolute; pointer-events: none; z-index: 3; opacity: 0; background-color: black; color: #aa00ff; font-family: Verdana; font-size: 100px; font-size: 1vh; display: block; margin: auto; padding: 0px; border: 4px solid #aa00ff; bottom: 0px;">
+
+</div>
+
+<div id="titlescreen" style="z-index: 1; background-color: black; color: #aa00ff; font-family: Verdana; font-size: 9vh; text-align: center;">
+  Welcome to Conway's Game of Life
+  <br>
+  <br>
+  <button onclick="fadeout(titlescreen);" style="background-color: black; color: #aa00ff; font-family: Verdana; font-size: 15vh; text-align: center;">
+    Start
+  </button>
+  <br>
+  <br>
+  <button onclick="fadein(hud);" style="background-color: black; color: #aa00ff; font-family: Verdana; font-size: 15vh; text-align: center;">
+    Controls
+  </button>
+  <br>
+  <br>
+</div>
+
+<canvas onmousemove="movepointer(event);" id="canvas" style="z-index: 0; border: 1px solid blue;"></canvas>
+
+<script>
+function log(text) {
+  console.log(text);
+  var x = document.createElement("div");
+  var y = document.createTextNode(text);
+  x.appendChild(y);
+  document.getElementById('log').appendChild(x);
+}
+
+//*/
+/* ###### cool visuals functions ###### */
+
+
+var fadetimeout;
+
+var titlescreen = document.getElementById("titlescreen");
+var hud = document.getElementById("hud");
+
+function fadeout(el) {
+  el.style.opacity = 1;
+  (function fade() {
+    if ((el.style.opacity -= .01) < 0) {
+      el.style.display = "none";
+      el.style.pointerEvents = "none";
+    } else {
+      requestAnimationFrame(fade);
+    }
+  })();
+}
+
+function fadein(el) {
+  el.style.opacity = 0;
+  el.style.display = "block";
+  el.style.pointerEvents = "auto";
+
+  (function fade() {
+    var val = parseFloat(el.style.opacity);
+    if (!((val += .1) > 1)) {
+      el.style.opacity = val;
+      requestAnimationFrame(fade);
+    }
+  })();
+}
+
+function slowfadein(el) {
+  el.style.opacity = 0;
+  el.style.display = "block";
+
+  (function fade() {
+    var val = parseFloat(el.style.opacity);
+    if (!((val += .005) > 1)) {
+      el.style.opacity = val;
+      requestAnimationFrame(fade);
+    }
+
+  })();
+}
+
+//*/
+/* ###### grid definition functions ###### */
+
+
+var ptr = {};
+var grid = {};
+var board = [];
+var pad = 1;
+var cd = 10;
+var gw = 10;
+var gh = 10;
+var kf = false;
+var cfill = 2;
+
+var debugdrawingmode = false;
+
+var adjcells = [
+  [-1, -1],
+  [0, -1],
+  [1, -1],
+  [-1, 0],
+  [1, 0],
+  [-1, 1],
+  [0, 1],
+  [1, 1]
+];
+
+ptr.x = 16;
+ptr.y = 16;
+ptr.d = 1;
+ptr.oldx = 1;
+ptr.oldy = 1;
+ptr.ax = 1;
+ptr.ay = 1;
+ptr.cx = 1;
+ptr.cy = 1;
+ptr.rx = 1;
+ptr.ry = 1;
+
+grid.ud = "#abcdef";
+grid.ul = "#000000";
+grid.sdb = "rgba(0,255,255,0.7)";
+grid.sd = "rgba(255,0,255,0.7)";
+grid.sl = "#ff0000";
+
+board.push([]);
+
+for (var iy = 0; iy < gh; iy++) {
+  board[0].push([]);
+  for (var ix = 0; ix < gw; ix++) {
+    board[0][iy].push(false);
+  }
+}
+
+//*/
+/* ###### drawing definitions ###### */
+
+
+var canvas = document.getElementById("canvas");
+canvas.width = gw * cd;
+canvas.height = gh * cd;
+var canvasbox = canvas.getBoundingClientRect();
+var ctx = canvas.getContext("2d");
+
+//*/
+/* ###### input definitions ###### */
+
+
+var hkey = false;
+var lkey = false;
+var ckey = false;
+var akey = false;
+var eightkey = false;
+var threekey = false;
+var shiftleft = false;
+var mousedown = false;
+var controlleft = false;
+
+//*/
+/* ###### Input Functions ###### */
+
+
+window.addEventListener("keydown", function(e) {
+  if (e.defaultPrevented) {
+    return;
+  }
+  switch (e.code || e.keyCode) {
+    case "KeyH":
+      if (!hkey)
+        fadein(hud);
+      hkey = true;
+      break;
+    case "KeyL":
+      if (!lkey)
+        fadein(document.getElementById('log'));
+      lkey = true;
+      break;
+    case "KeyD":
+      if (!debugdrawingmode)
+        window.requestAnimationFrame(debugdraw);
+      debugdrawingmode = true;
+      break;
+    case "ArrowDown":
+      ptr.y += ptr.d;
+      window.requestAnimationFrame(redraw);
+      break;
+    case "ArrowUp":
+      ptr.y -= ptr.d;
+      window.requestAnimationFrame(redraw);
+      break;
+    case "ArrowLeft":
+      ptr.x -= ptr.d;
+      window.requestAnimationFrame(redraw);
+      break;
+    case "ArrowRight":
+      ptr.x += ptr.d;
+      window.requestAnimationFrame(redraw);
+      break;
+    case "Digit1":
+      cfill = 0;
+      window.requestAnimationFrame(redraw);
+      break;
+    case 49:
+      cfill = 0;
+      window.requestAnimationFrame(redraw);
+      break;
+    case "Digit2":
+      cfill = 1;
+      window.requestAnimationFrame(redraw);
+      break;
+    case 50:
+      cfill = 1;
+      window.requestAnimationFrame(redraw);
+      break;
+    case "Digit3":
+      cfill = 3;
+      if (!threekey)
+        window.requestAnimationFrame(redraw);
+      threekey = true;
+      break;
+    case 51:
+      cfill = 3;
+      if (!threekey)
+        window.requestAnimationFrame(redraw);
+      threekey = true;
+      break;
+    case "Digit8":
+      ptr.x = Math.floor(Math.random() * (gw - 1 + 1)) + 1;
+      ptr.y = Math.floor(Math.random() * (gh - 1 + 1)) + 1;
+      ptr.cx = Math.floor(Math.random() * (gw - 1 + 1)) + 1;
+      ptr.cy = Math.floor(Math.random() * (gh - 1 + 1)) + 1;
+      ptr.oldx = Math.floor(Math.random() * (gw - 1 + 1)) + 1;
+      ptr.oldy = Math.floor(Math.random() * (gh - 1 + 1)) + 1;
+      eightkey = true;
+      window.requestAnimationFrame(redraw);
+      break;
+    case 56:
+      ptr.x = Math.floor(Math.random() * (gw - 1 + 1)) + 1;
+      ptr.y = Math.floor(Math.random() * (gh - 1 + 1)) + 1;
+      ptr.cx = (Math.floor(Math.random() * (gw - 1 + 1)) + 1 + ptr.x) / 2;
+      ptr.cy = (Math.floor(Math.random() * (gh - 1 + 1)) + 1 + ptr.y) / 2;
+      ptr.oldx = Math.floor(Math.random() * (gw - 1 + 1)) + 1;
+      ptr.oldy = Math.floor(Math.random() * (gh - 1 + 1)) + 1;
+      eightkey = true;
+      window.requestAnimationFrame(redraw);
+      break;
+    case "KeyN":
+      nextframe();
+      break;
+    case 78:
+      nextframe();
+      break;
+    case "KeyF":
+      if (!kf) {
+        kf = true;
+        nextframe();
+      }
+      break;
+    case 70:
+      if (!kf) {
+        kf = true;
+        nextframe();
+      }
+      break;
+    case "KeyZ":
+      board.push(board.shift());
+      checkBoardSize();
+      break;
+    case 90:
+      board.push(board.shift());
+      checkBoardSize();
+      break;
+    case "KeyX":
+      board.unshift(board.pop());
+      checkBoardSize();
+      break;
+    case 88:
+      board.unshift(board.pop());
+      checkBoardSize();
+      break;
+    case "ShiftLeft":
+      if (!shiftleft && !mousedown && !controlleft) {
+        ptr.oldx = ptr.x;
+        ptr.oldy = ptr.y;
+      }
+      shiftleft = true;
+      break;
+    case "KeyA":
+      if (!akey) {
+        ptr.ax = ptr.x;
+        ptr.ay = ptr.y;
+      }
+      akey = true;
+      break;
+    case "KeyC":
+      if (!ckey) {
+        ptr.cx = ptr.x;
+        ptr.cy = ptr.y;
+      }
+      ckey = true;
+      break;
+    case "ShiftRight":
+      ptr.d = 5;
+      break;
+    case "ControlLeft":
+      if (!shiftleft && !mousedown && !controlleft) {
+        ptr.oldx = ptr.x;
+        ptr.oldy = ptr.y;
+      }
+      controlleft = true;
+      break;
+    default:
+      return;
+  }
+  e.preventDefault();
+}, true);
+
+window.addEventListener("keyup", function(e) {
+  switch (e.code || e.keyCode) {
+    case "KeyH":
+      if (hkey)
+        fadeout(hud);
+      hkey = false;
+      break;
+    case "KeyL":
+      if (lkey)
+        fadeout(document.getElementById('log'));
+      lkey = false;
+      break;
+    case "KeyD":
+      debugdrawingmode = false;
+      break;
+    case "Digit1":
+      cfill = 2;
+      break;
+    case "Digit2":
+      cfill = 2;
+      break;
+    case 49:
+      cfill = 2;
+      break;
+    case 50:
+      cfill = 2;
+      break;
+    case "Digit8":
+      eightkey = false;
+      break;
+    case 56:
+      eightkey = false;
+      break;
+    case "Digit3":
+      threekey = false;
+      break;
+    case 51:
+      threekey = false;
+      break;
+    case "KeyF":
+      kf = false;
+      break;
+    case "ShiftLeft":
+      shiftleft = false;
+      break;
+    case "KeyA":
+      akey = false;
+      break;
+    case "KeyC":
+      ckey = false;
+      break;
+    case "ShiftRight":
+      ptr.d = 1;
+      break;
+    case "KeyR":
+      board.unshift(board[0]);
+      for (var iy = 0; iy < gh; iy++)
+        for (var ix = 0; ix < gw; ix++)
+          board[0][iy][ix] = false;
+      break;
+    case "ControlLeft":
+      controlleft = false;
+      break;
+    default:
+      return;
+  }
+}, true);
+
+canvas.onmousedown = function() {
+  if (!shiftleft && !mousedown && !controlleft) {
+    ptr.oldx = ptr.x;
+    ptr.oldy = ptr.y;
+  }
+  mousedown = true;
+};
+
+canvas.onmouseup = function() {
+  mousedown = false;
+};
+
+function movepointer(e) {
+  var rect = canvas.getBoundingClientRect() || 0;
+  ptr.x = Math.round((e.clientX - cd / 2 - rect.left) / cd) || ptr.x;
+  ptr.y = Math.round((e.clientY - cd / 2 - rect.top) / cd) || ptr.y;
+  window.requestAnimationFrame(redraw);
+}
+
+//*/
+/* ###### dynamic scaling functions ###### */
+
+
+var resizetimeout = setTimeout(resizefunction);
+
+window.onresize = function() {
+  clearTimeout(resizefunction);
+  resizetimeout = setTimeout(resizefunction);
+};
+
+function resizefunction() {
+  try {
+    gw = Math.max(Math.floor((window.innerWidth - 2) / cd), 10);
+    gh = Math.max(Math.floor((window.innerHeight - 2) / cd), 10);
+
+    canvas.style.left = ((window.innerWidth - cd * gw) / 2);
+    canvas.style.top = ((window.innerHeight - cd * gh) / 2);
+
+    canvas.width = gw * cd;
+    canvas.height = gh * cd;
+
+    while (board[0].length < gh && board[0] !== undefined)
+      board[0].push([]);
+
+    for (var iy = 0; iy < Math.max(gh, board[0].length) && board[0] !== undefined; iy++)
+      while (board[0][iy].length < gw && board[0][iy] !== undefined)
+        board[0][iy].push(false);
+
+    while (board[0].length > gh && board[0] !== undefined)
+      board[0].pop();
+
+    window.requestAnimationFrame(redraw);
+  } catch (err) {
+    log('resizefunction: ' + err.toString());
+  }
+}
+
+function checkBoardSize() {
+  while (board[0].length < gh && board[0] !== undefined)
+    board[0].push([]);
+
+  for (var iy = 0; iy < Math.max(gh, board[0].length) && board[0] !== undefined; iy++)
+    while (board[0][iy].length < gw && board[0][iy] !== undefined)
+      board[0][iy].push(false);
+
+  while (board[0].length > gh && board[0] !== undefined)
+    board[0].pop();
+
+  window.requestAnimationFrame(redraw);
+}
+
+
+/* ###### game logic functions ###### */
+
+
+var maxMemoryEnabled = false;
+
+if (performance)
+  if (performance.memory)
+    if (performance.memory.jsHeapSizeLimit)
+      if (performance.memory.usedJSHeapSize)
+        maxMemoryEnabled = true;
+
+log('maxMemoryEnabled = ' + maxMemoryEnabled);
+
+if (maxMemoryEnabled) {
+  log('memory usage is: ' + performance.memory.usedJSHeapSize + ' / ' + performance.memory.jsHeapSizeLimit);
+  log('Now I can consume all of your rams');
+  log('...If they taste good that is...');
+  log('...Or maybe I can just slash it\'s tires...');
+  log('...Now I bet you think this is really phun-ny...');
+}
+
+function nextframe() {
+  try {
+
+    if (maxMemoryEnabled)
+      if (performance.memory.usedJSHeapSize > performance.memory.jsHeapSizeLimit * 0.9)
+        board.pop();
+
+    board.unshift([]);
+
+    log(board.length);
+
+    for (var iy = 0; iy < gh; iy++) {
+      board[0].push([]);
+      for (var ix = 0; ix < gw; ix++) {
+
+
+        var countt = 0;
+
+        if (1 < ix && ix < gw - 1 && 1 < iy && iy < gh - 1)
+          for (var ia = 0; ia < adjcells.length; ia++)
+            if (board[1][iy + adjcells[ia][1]][ix + adjcells[ia][0]])
+              countt++;
+
+        if (countt === 3)
+          board[0][iy].push(true);
+        else if (countt === 2 && board[1][iy][ix])
+          board[0][iy].push(true);
+        else
+          board[0][iy].push(false);
+      }
+    }
+
+    window.requestAnimationFrame(redraw);
+  } catch (err) {
+    log('nextframe: ' + err.toString());
+  }
+}
+
+//*/
+/* ###### game drawing functions ###### */
+
+
+function redraw() {
+  try {
+    ptr.x = Math.max(1, Math.min(ptr.x, gw - 2));
+    ptr.y = Math.max(1, Math.min(ptr.y, gh - 2));
+
+    ptr.oldx = Math.max(1, Math.min(ptr.oldx, gw - 2));
+    ptr.oldy = Math.max(1, Math.min(ptr.oldy, gh - 2));
+
+    ptr.cx = Math.max(1, Math.min(ptr.cx, gw - 2));
+    ptr.cy = Math.max(1, Math.min(ptr.cy, gh - 2));
+
+    if (!shiftleft && !mousedown && !controlleft) {
+      ptr.oldx = ptr.x;
+      ptr.oldy = ptr.y;
+    }
+
+    ctx.fillStyle = grid.ud;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = grid.ul;
+
+    for (var iy = 0; iy < gh; iy++)
+      ctx.clearRect(0, iy * cd, canvas.width, pad);
+
+    for (var ix = 0; ix < gw; ix++)
+      ctx.clearRect(ix * cd, 0, pad, canvas.height);
+
+    for (var iy = 0; iy < gh; iy++)
+      for (var ix = 0; ix < gw; ix++)
+        if (board[0][iy][ix])
+          ctx.fillRect(ix * cd + pad, iy * cd + pad, cd - pad, cd - pad);
+
+
+    if (ckey) {
+
+      var dx = ptr.x - ptr.cx;
+      var dy = ptr.y - ptr.cy;
+
+      var r2 = Math.abs(Math.pow(dx, 2) + Math.pow(dy, 2));
+      var radius = Math.sqrt(r2);
+
+      ctx.beginPath();
+      ctx.arc((ptr.cx + 0.5) * cd, (ptr.cy + 0.5) * cd, radius * cd, 0, 2 * Math.PI);
+      ctx.stroke();
+
+      for (var x = Math.round(Math.max(ptr.cx - radius, 2)); x <= Math.min(ptr.cx + radius, gw - 2); x++) {
+        var sqrt = Math.sqrt(r2 - Math.min(Math.pow(x - ptr.cx, 2), r2));
+
+        var y1 = Math.max(Math.min(Math.round(ptr.cy + sqrt), gh - 2), 1);
+        var y2 = Math.max(Math.min(Math.round(ptr.cy - sqrt), gh - 2), 1);
+
+        switch (cfill) {
+          case 1:
+            board[0][y1][x] = true;
+            board[0][y2][x] = true;
+            break;
+          case 0:
+            board[0][y1][x] = false;
+            board[0][y2][x] = false;
+            break;
+          case 3:
+            board[0][y1][x] = !board[0][y1][x];
+            board[0][y2][x] = !board[0][y2][x];
+            break;
+        }
+
+        if (board[0][y1][x])
+          ctx.fillStyle = grid.sl;
+        else
+          ctx.fillStyle = grid.sd;
+
+        ctx.fillRect(x * cd + pad, y1 * cd + pad, cd - pad, cd - pad);
+
+        if (board[0][y2][x])
+          ctx.fillStyle = grid.sl;
+        else
+          ctx.fillStyle = grid.sd;
+
+        ctx.fillRect(x * cd + pad, y2 * cd + pad, cd - pad, cd - pad);
+      }
+
+      for (var y = Math.round(Math.max(ptr.cy - radius, 1)); y <= Math.min(ptr.cy + radius, gh - 2); y++) {
+        var sqrt = Math.sqrt(r2 - Math.min(Math.pow(y - ptr.cy, 2), r2));
+        var x1 = Math.max(Math.min(Math.round(ptr.cx + sqrt), gw - 2), 1);
+        var x2 = Math.max(Math.min(Math.round(ptr.cx - sqrt), gw - 2), 1);
+
+        switch (cfill) {
+          case 1:
+            board[0][y][x1] = true;
+            board[0][y][x2] = true;
+            break;
+          case 0:
+            board[0][y][x1] = false;
+            board[0][y][x2] = false;
+            break;
+          case 3:
+            board[0][y][x1] = !board[0][y][x1];
+            board[0][y][x2] = !board[0][y][x2];
+            break;
+        }
+
+        if (board[0][y][x1])
+          ctx.fillStyle = grid.sl;
+        else
+          ctx.fillStyle = grid.sdb;
+
+        ctx.fillRect(x1 * cd + pad, y * cd + pad, cd - pad, cd - pad);
+
+        if (board[0][y][x2])
+          ctx.fillStyle = grid.sl;
+        else
+          ctx.fillStyle = grid.sdb;
+
+        ctx.fillRect(x2 * cd + pad, y * cd + pad, cd - pad, cd - pad);
+      }
+
+    }
+
+    var y0 = Math.min(ptr.y, ptr.oldy);
+    var y1 = Math.max(ptr.y, ptr.oldy);
+
+    var x0 = Math.min(ptr.x, ptr.oldx);
+    var x1 = Math.max(ptr.x, ptr.oldx);
+
+    var dx = ptr.x - ptr.oldx;
+    var dy = ptr.y - ptr.oldy;
+
+    var slope = dy / dx;
+
+    if (controlleft) {
+
+      var negativeslopeyoffset = 0;
+
+      if (slope < 0)
+        negativeslopeyoffset = Math.abs(dy);
+
+      if (Math.abs(dx) > 0)
+        for (var x = x0; x <= x1; x++) {
+
+          var y = Math.round(negativeslopeyoffset + y0 + slope * (x - x0));
+
+          switch (cfill) {
+            case 1:
+              board[0][y][x] = true;
+              break;
+            case 0:
+              board[0][y][x] = false;
+              break;
+            case 3:
+              board[0][y][x] = !board[0][y][x];
+              break;
+          }
+
+          if (board[0][y][x])
+            ctx.fillStyle = grid.sl;
+          else
+            ctx.fillStyle = grid.sd;
+
+          ctx.fillRect(x * cd + pad, y * cd + pad, cd - pad, cd - pad);
+        }
+
+      if (Math.abs(dy) > 0)
+        for (var y = y0; y <= y1; y++) {
+
+          var x = Math.round(x0 + (y - y0 - negativeslopeyoffset) / slope);
+
+          switch (cfill) {
+            case 1:
+              board[0][y][x] = true;
+              break;
+            case 0:
+              board[0][y][x] = false;
+              break;
+            case 3:
+              board[0][y][x] = !board[0][y][x];
+              break;
+          }
+
+          if (board[0][y][x])
+            ctx.fillStyle = grid.sl;
+          else
+            ctx.fillStyle = grid.sdb;
+
+          ctx.fillRect(x * cd + pad, y * cd + pad, cd - pad, cd - pad);
+        }
+
+    }
+
+    if (!ckey && !controlleft)
+      for (var y = y0; y <= y1; y++)
+        for (var x = x0; x <= x1; x++) {
+
+          switch (cfill) {
+            case 1:
+              board[0][y][x] = true;
+              break;
+            case 0:
+              board[0][y][x] = false;
+              break;
+            case 3:
+              board[0][y][x] = !board[0][y][x];
+              break;
+          }
+
+          if (board[0][y][x])
+            ctx.fillStyle = grid.sl;
+          else
+            ctx.fillStyle = grid.sd;
+
+          ctx.fillRect(x * cd + pad, y * cd + pad, cd - pad, cd - pad);
+
+        }
+
+    if (cfill === 3 && !eightkey)
+      cfill = 2;
+
+    if (debugdrawingmode)
+      debugdraw();
+
+    if (kf)
+      nextframe();
+
+  } catch (err) {
+    log('redraw: ' + err.toString());
+  }
+}
+
+function debugdraw() {
+  ctx.font = (cd) + "px Courier New";
+  ctx.fillStyle = "#00aaff";
+  ctx.textAlign = "center";
+  for (var iy = 1; iy < gh - 1; iy++) {
+    for (var ix = 1; ix < gw - 1; ix++) {
+
+      var countt = 0;
+
+      for (var ia = 0; ia < adjcells.length; ia++)
+        if (board[0][iy + adjcells[ia][1]][ix + adjcells[ia][0]])
+          countt++;
+
+      if (countt > 0)
+        ctx.fillText(countt, ix * cd + cd / 2, iy * cd + cd);
+    }
+  }
+}
+
+//*/
+/* ###### copy and paste functions ###### */
+
+
+var filledchar = '@';
+var spacechar = '_';
+
+var clipboard = new Clipboard('canvas', {
+  text: function(e) {
+    var output = '';
+    for (var y = Math.min(ptr.y, ptr.oldy); y <= Math.max(ptr.y, ptr.oldy); y++) {
+      for (var x = Math.min(ptr.x, ptr.oldx); x <= Math.max(ptr.x, ptr.oldx); x++)
+        if (board[0][y][x])
+          output += filledchar;
+        else
+          output += spacechar;
+      if (y < Math.max(ptr.y, ptr.oldy))
+        output += '\n';
+    }
+    return output;
+  }
+});
+
+function getpaste(e) {
+  try {
+    var data = e.clipboardData.getData("text/plain").split('\n');
+    for (var y = Math.max(ptr.y, 0); y < Math.min(ptr.y + data.length, gh - 1); y++)
+      if (data[y - Math.max(ptr.y, 0)] !== undefined)
+        for (var x = Math.max(ptr.x, 0); x < Math.min(ptr.x + data[y - Math.max(ptr.y, 1)].length, gw - 1); x++)
+          if (data[y - Math.max(ptr.y, 0)][x - Math.max(ptr.x, 0)] === filledchar || data[y - Math.max(ptr.y, 0)][x - Math.max(ptr.x, 0)] === '1')
+            board[0][y][x] = true;
+          else if (data[y - Math.max(ptr.y, 0)][x - Math.max(ptr.x, 0)] === spacechar)
+      board[0][y][x] = false;
+
+    window.requestAnimationFrame(redraw);
+  } catch (err) {
+    log('getpaste: ' + err.toString());
+  }
+}
+
+document.addEventListener('paste', function(e) {
+  getpaste(e);
+}, false);
+
+//*/
+
+</script>
+</body>
+</html>
