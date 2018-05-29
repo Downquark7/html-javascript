@@ -79,6 +79,18 @@ canvas {
     Click this button <i>to change speed to 500!</i>
   </button>
   <br>
+  <button onclick="speed = 1000; pause();">
+    Click this button <i>to change speed to 1000!</i>
+  </button>
+  <br>
+  <button onclick="speed = 2000; pause();">
+    Click this button <i>to change speed to 2000!</i>
+  </button>
+  <br>
+  <button onclick="speed = 5000; pause();">
+    Click this button <i>to change speed to 5000!</i>
+  </button>
+  <br>
   <button onclick="hackGravity = true;">
     Click this button <i>if you suck at Tetris!</i>
   </button>
@@ -371,6 +383,20 @@ function newPiece() {
   transform(Math.floor((grid[0].length / 2) - 4), 0);
 }
 
+function specificNewPiece(n) {
+  window.scrollTo(0, 0);
+  document.getElementById("dashboard").style.positionTop = 0 + "px";
+  grid[1] = blankGrid()[1];
+  grid[2] = blankGrid()[2];
+  checkRows();
+  pieceNum = n;
+  for (i = 0; i < 4; i++) {
+    piecex[i] = piecesx[pieceNum][i];
+    piecey[i] = piecesy[pieceNum][i];
+  }
+  piececolor = Math.floor(Math.random() * 5 + 1);
+  transform(Math.floor((grid[0].length / 2) - 4), 0);
+}
 
 
 function height() {
@@ -526,6 +552,7 @@ function checkKey(e) {
 
   if (e.keyCode == '38') {
     // up arrow
+	transform(0, -1);
   } else if (e.keyCode == '40') {
     // down arrow
     transform(0, 1);
@@ -544,6 +571,20 @@ function checkKey(e) {
   } else if (e.keyCode == '32') {
     // space
     newPiece();
+  } else if (e.keyCode == '49') {
+	specificNewPiece(2);
+  } else if (e.keyCode == '50') {
+	specificNewPiece(1);
+  } else if (e.keyCode == '51') {
+	specificNewPiece(5);
+  } else if (e.keyCode == '52') {
+	specificNewPiece(6);
+  } else if (e.keyCode == '53') {
+	specificNewPiece(3);
+  } else if (e.keyCode == '54') {
+	specificNewPiece(0);
+  } else if (e.keyCode == '55') {
+	specificNewPiece(4);
   }
 
 
