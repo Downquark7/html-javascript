@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Do We Feel the Arby's Inside???</title>
+	<link rel="stylesheet" type="text/css" href="jeffrey/style.css">
+	<meta name="description" content="Do we feel the Arby's inside??">
+	<script src="jeffrey/lib/jquery.js"></script>
+	<script type="text/javascript" src="jeffrey/lib/paper.js"></script>
+	<script src="jeffrey/lib/mediaelement.min.js"></script>
+	<script type="text/paperscript" canvas="myCanvas" src="jeffrey/lib/mainc4ca.js"></script>
+    <script>
+        $(function(){
+            if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+                $("#myCanvas").hide();
+                $("body").click(function(){
+                    $("#myCanvas").show();
+                    $(".play").hide();
+                    $("#bernies")[0].play();
+                });
+            }
+            else {
+                $(".play").hide();
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="play"><img src="jeffrey/img/play.png" /></div>
+	<div class="twitt"><a href="http://twitter.com/taylorgipple" target="_blank">@taylorgipple</a><br>Downquark7</div>
+	<div class="social">
+				<div class="social-inner">
+			<a href="http://dowefeelthebern.com/">This code was modified from dowefeelthebern.com</a>
+		</div></div>
+
+	<img src="jeffrey/img/jeffrey1.png" id="bern1" class="bernies" />
+	<img src="jeffrey/img/jeffrey2.png" id="bern2" class="bernies" />
+	<img src="jeffrey/img/jeffrey3.png" id="bern3" class="bernies" />
+	<img src="jeffrey/img/jeffrey4.png" id="bern4" class="bernies" />
+	<img src="jeffrey/img/jeffrey5.png" id="bern5" class="bernies" />
+	<img src="jeffrey/img/jeffrey6.png" id="bern6" class="bernies" />
+	<canvas id="myCanvas" resize></canvas>
+	<audio id="bernies" autoplay autobuffer loop style='display:none'>
+	  <source src="jeffrey/jeffrey.mp3" type="audio/mpeg">
+	</audio>
+</body>
+</html>
